@@ -1,14 +1,18 @@
 lurker = require 'lib/lurker'
 
-require 'levels'
-require 'player'
-require 'gen'
-
 
 function love.load()
 	ubuntubold = love.graphics.newFont("data/fnt/UbuntuMono-B.ttf", 22)
 	love.graphics.setFont(ubuntubold)
+
+	require 'levels'
 	variables()
+
+	require 'noti'
+	require 'player'
+	require 'weap'
+	require 'gen'
+
 	gen_map(game.mapn)
 	gen_player(game.mapn)
 end
@@ -23,9 +27,6 @@ end
 
 function love.keypressed(key, isrepeat)	
 	if not isrepeat then
-		-- if key == "1" then
-		-- 	stat_add()
-		-- end
 		mov_player(key)
 		act_player(key)
 	end
@@ -67,11 +68,11 @@ function variables()
 	player._mhp = 100
 	player.arm = 30
 	player.pwr = 90
-	player.inv = {}
+	player.inv = {} -- Entries have 
 	player.wield = "MLASMID"
 	player.primed = false
 
-	player.weaps = {
+	weaps = {
 		"MLASLOW",
 		"MLASMID"
 	}
@@ -129,118 +130,4 @@ function chk_tile(x, y, dir, tile)
 		return (game.map[game.mapn][j][i+1] == tile)
 	end
 	return false
-end
-
-function weap_mlaslow(dir) -- mining laser low power
-	local j = player.y/game.ts
-	local i = player.x/game.ts
-	if dir == "left" then
-		if chk_tile(player.x, player.y, "left", wall) then
-			 game.map[game.mapn][j][i-1] = floor
-		end
-	elseif dir == "down" then
-		if chk_tile(player.x, player.y, "down", wall) then
-			game.map[game.mapn][j+1][i] = floor
-		end
-	elseif dir == "up" then
-		if chk_tile(player.x, player.y, "up", wall) then
-			game.map[game.mapn][j-1][i] = floor
-		end
-	elseif dir == "right" then
-		if chk_tile(player.x, player.y, "right", wall) then
-			 game.map[game.mapn][j][i+1] = floor
-		end
-	end
-	stat_add("Zap!")
-	stat_add("You hear the rock crumble.")
-end
-
-function weap_mlasmid(dir) -- mining laser low power
-	local j = player.y/game.ts
-	local i = player.x/game.ts
-	if dir == "left" then
-		if chk_tile(player.x, player.y, "left", wall) or 
-		   chk_tile(player.x, player.y, "left", air) then
-		     if game.map[game.mapn][j][i-2] == air then
-		     	game.map[game.mapn][j][i-3] = wall
-		     end
-		     game.map[game.mapn][j][i-3] = wall
-			 game.map[game.mapn][j][i-1] = floor
-			 game.map[game.mapn][j][i-2] = floor
-			 game.map[game.mapn][j-1][i-1] = wall
-			 game.map[game.mapn][j+1][i-1] = wall
-			 game.map[game.mapn][j-1][i-2] = wall
-			 game.map[game.mapn][j+1][i-2] = wall
-		end
-	elseif dir == "down" then
-		if chk_tile(player.x, player.y, "down", wall) or 
-		   chk_tile(player.x, player.y, "down", air) then
-		    if game.map[game.mapn][j+2][i] == air then
-		    	game.map[game.mapn][j+3][i] = wall
-		    end
-			game.map[game.mapn][j+1][i] = floor
-			game.map[game.mapn][j+2][i] = floor
-			game.map[game.mapn][j+2][i+1] = wall
-			game.map[game.mapn][j+2][i-1] = wall
-			game.map[game.mapn][j+1][i+1] = wall
-			game.map[game.mapn][j+1][i-1] = wall
-		end
-	elseif dir == "up" then
-		if chk_tile(player.x, player.y, "up", wall) or 
-		   chk_tile(player.x, player.y, "up", air) then
-		   	if game.map[game.mapn][j-2][i] == air then
-				game.map[game.mapn][j-3][i] = wall
-			end
-			game.map[game.mapn][j-1][i] = floor
-			game.map[game.mapn][j-2][i] = floor
-			game.map[game.mapn][j-2][i-1] = wall
-			game.map[game.mapn][j-2][i+1] = wall
-			game.map[game.mapn][j-1][i-1] = wall
-			game.map[game.mapn][j-1][i+1] = wall
-			
-		end
-	elseif dir == "right" then
-		if chk_tile(player.x, player.y, "right", wall) or
-		   chk_tile(player.x, player.y, "right", air) then
-		   	 if game.map[game.mapn][j][i+2] == air then
-				game.map[game.mapn][j][i+3] = wall
-			 end
-			 game.map[game.mapn][j][i+1] = floor
-			 game.map[game.mapn][j][i+2] = floor
-			 game.map[game.mapn][j+1][i+1] = wall
-			 game.map[game.mapn][j-1][i+1] = wall
-			 game.map[game.mapn][j+1][i+2] = wall
-			 game.map[game.mapn][j-1][i+2] = wall
-		end
-	end
-	stat_add("Zap!")
-	stat_add("You hear the rock cave in.")
-end
-
-function stat_add(s)
-	status[4] = status[3]
-	status[3] = status[2]
-	status[2] = status[1]
-	status[1] = s
-end
-
-function drw_stat()
-	love.graphics.setColor(150, 150, 150, 55)
-	love.graphics.print(status[4], 370, (game.maph+1.2)*game.ts)
-	love.graphics.setColor(150, 150, 150, 100)
-	love.graphics.print(status[3], 370, (game.maph+2.4)*game.ts)
-	love.graphics.setColor(150, 150, 150, 155)
-	love.graphics.print(status[2], 370, (game.maph+3.6)*game.ts)
-	love.graphics.setColor(150, 150, 150, 200)
-	love.graphics.print(status[1], 370, (game.maph+4.8)*game.ts)
-end
-
-function fire_weap(dir)
-	if player.wield == "MLASLOW" then
-		weap_mlaslow(dir)
-		player.primed = false
-	elseif player.wield == "MLASMID" then
-		weap_mlasmid(dir)
-		player.primed = false
-	end
 end

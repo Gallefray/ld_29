@@ -60,17 +60,17 @@ function act_player(key)
 		elseif key == 'l' then
 			fire_weap("right")
 		else
-			stat_add("Invalid direction!")
+			add_stat("Invalid direction!")
 			primed = false
 		end
 	else
 		local k
 		if key == 'g' then
-			for k = 0, #player.weaps do
-				if player.weild == player.weaps[k] then
+			for k = 0, #weaps do
+				if player.weild == weaps[k] then
 					print("bloop")
 					player.primed = true
-					stat_add("Pick a direction to fire in.")
+					add_stat("Pick a direction to fire in.")
 				end
 			end
 		end
