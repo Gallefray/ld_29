@@ -64,11 +64,15 @@ function act_player(key)
 			primed = false
 		end
 	else
-		print("bleep")
-		if key == 'g' and player.wield == "MLASLOW" then
-			print("bloop")
-			player.primed = true
-			stat_add("Pick a direction to fire in.")
+		local k
+		if key == 'g' then
+			for k = 0, #player.weaps do
+				if player.weild == player.weaps[k] then
+					print("bloop")
+					player.primed = true
+					stat_add("Pick a direction to fire in.")
+				end
+			end
 		end
 	end
 end

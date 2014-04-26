@@ -55,10 +55,10 @@ function variables()
 	game.ts = 15 -- ?
 
 	status = {
-	"",
-	"",
-	"",
-	""
+		"",
+		"",
+		"",
+		""
 	}
 
 	gen = {}
@@ -68,8 +68,13 @@ function variables()
 	player.arm = 30
 	player.pwr = 90
 	player.inv = {}
-	player.wield = "MLASLOW"
+	player.wield = "MLASMID"
 	player.primed = false
+
+	player.weaps = {
+		"MLASLOW",
+		"MLASMID"
+	}
 end
 
 function colorize(i)
@@ -106,7 +111,8 @@ function drw_hud()
 	love.graphics.print("PWR: ", 15, (game.maph+2.7)*game.ts)
 	colorize(player.pwr)
 	love.graphics.print(player.pwr, 64, (game.maph+2.7)*game.ts)
-
+	love.graphics.setColor(150, 150, 150, 255)
+	love.graphics.print("LVL: " .. game.mapn, 15, (game.maph+4.2)*game.ts)
 end
 
 -- I could clean up a lot of code by using this function, something for day 3!
@@ -145,6 +151,8 @@ function weap_mlaslow(dir) -- mining laser low power
 			 game.map[game.mapn][j][i+1] = floor
 		end
 	end
+	stat_add("Zap!")
+	stat_add("You hear the rock crumble.")
 end
 
 function weap_mlasmid(dir) -- mining laser low power
@@ -153,6 +161,10 @@ function weap_mlasmid(dir) -- mining laser low power
 	if dir == "left" then
 		if chk_tile(player.x, player.y, "left", wall) or 
 		   chk_tile(player.x, player.y, "left", air) then
+		     if game.map[game.mapn][j][i-2] == air then
+		     	game.map[game.mapn][j][i-3] = wall
+		     end
+		     game.map[game.mapn][j][i-3] = wall
 			 game.map[game.mapn][j][i-1] = floor
 			 game.map[game.mapn][j][i-2] = floor
 			 game.map[game.mapn][j-1][i-1] = wall
@@ -163,6 +175,9 @@ function weap_mlasmid(dir) -- mining laser low power
 	elseif dir == "down" then
 		if chk_tile(player.x, player.y, "down", wall) or 
 		   chk_tile(player.x, player.y, "down", air) then
+		    if game.map[game.mapn][j+2][i] == air then
+		    	game.map[game.mapn][j+3][i] = wall
+		    end
 			game.map[game.mapn][j+1][i] = floor
 			game.map[game.mapn][j+2][i] = floor
 			game.map[game.mapn][j+2][i+1] = wall
@@ -173,16 +188,23 @@ function weap_mlasmid(dir) -- mining laser low power
 	elseif dir == "up" then
 		if chk_tile(player.x, player.y, "up", wall) or 
 		   chk_tile(player.x, player.y, "up", air) then
+		   	if game.map[game.mapn][j-2][i] == air then
+				game.map[game.mapn][j-3][i] = wall
+			end
 			game.map[game.mapn][j-1][i] = floor
 			game.map[game.mapn][j-2][i] = floor
 			game.map[game.mapn][j-2][i-1] = wall
 			game.map[game.mapn][j-2][i+1] = wall
 			game.map[game.mapn][j-1][i-1] = wall
 			game.map[game.mapn][j-1][i+1] = wall
+			
 		end
 	elseif dir == "right" then
 		if chk_tile(player.x, player.y, "right", wall) or
 		   chk_tile(player.x, player.y, "right", air) then
+		   	 if game.map[game.mapn][j][i+2] == air then
+				game.map[game.mapn][j][i+3] = wall
+			 end
 			 game.map[game.mapn][j][i+1] = floor
 			 game.map[game.mapn][j][i+2] = floor
 			 game.map[game.mapn][j+1][i+1] = wall
@@ -191,6 +213,8 @@ function weap_mlasmid(dir) -- mining laser low power
 			 game.map[game.mapn][j-1][i+2] = wall
 		end
 	end
+	stat_add("Zap!")
+	stat_add("You hear the rock cave in.")
 end
 
 function stat_add(s)
@@ -214,7 +238,9 @@ end
 function fire_weap(dir)
 	if player.wield == "MLASLOW" then
 		weap_mlaslow(dir)
-		stat_add("Zap!")
+		player.primed = false
+	elseif player.wield == "MLASMID" then
+		weap_mlasmid(dir)
 		player.primed = false
 	end
 end
