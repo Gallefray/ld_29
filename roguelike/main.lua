@@ -126,22 +126,32 @@ end
 function gen_room(mapn)
 	math.randomseed(os.time())
 
-	local x = math.random(1+2, game.mapw-2)
-	local y = math.random(1+2, game.maph-2)
-	local w = math.random(4, 26)
-	local h = math.random(4, 26)
+	local min_rx = 1+2
+	local min_ry = 1+2
+	local max_rx = game.mapw-2
+	local max_ry = game.maph-2
+
+	local min_rw = 6
+	local min_rh = 6 
+	local max_rw = 20
+	local max_rh = 20
+
+	local x = math.random(min_rx, max_rx)
+	local y = math.random(min_ry, max_ry)
+	local w = math.random(min_rw, max_rw)
+	local h = math.random(min_rh, max_rh)
 
 	print("x: " .. x .. " y: " .. y .. " w: " .. w .. " h: " .. h)
 
 	for k = 0, 11 do
 		if x+w > game.mapw then
-			x = math.random(1+2, game.mapw-2)
-			w = math.random(4, 26)
+			x = math.random(min_rx, max_rx)
+			w = math.random(min_rw, max_rw)
 			print("regenerating the x coordinate and width")
 		end
 		if y+h > game.maph then
-			y = math.random(1+2, game.maph-2)
-			h = math.random(4, 24)
+			y = math.random(min_ry, max_ry)
+			h = math.random(min_rh, max_rh)
 			print("regenerating the y coordinate and height")
 		end
 	end
@@ -158,7 +168,7 @@ function gen_room(mapn)
 			for i = x, x+w do
 				for j = y, y+h do
 					print("J: " .. j .. " I: " .. i)
-					if game.map[mapn][j][i] == wall or 
+					if game.map[mapn][j][i] == wall or
 					   game.map[mapn][j][i] == floor then
 					   	regen = true
 					   	break
@@ -170,18 +180,58 @@ function gen_room(mapn)
 			end
 		end
 		if x+w >= game.mapw or regen == true then
-			x = math.random(1+2, game.mapw-2)
-			w = math.random(4, 26)
+			x = math.random(min_rx, max_rx)
+			w = math.random(min_rw, max_rw)
 		end
 		if y+h >= game.maph or regen == true then
-			y = math.random(1+2, game.maph-3)
-			h = math.random(4, 24)
+			y = math.random(min_ry, max_ry)
+			h = math.random(min_rh, max_rh)
 		end
 	end
 
 	if x+w > game.mapw or y+h > game.maph or regen == true then
 		print("Tried 11 times - Failed")
 		return 0
+	end
+
+	-- check if the room is close to another one and space it out if it is
+	-- y top, y bottom
+	j = y
+	for i = x, x+w do
+		if game.map[mapn][j-1][i] == wall or game.map[mapn][j-1][i] == floor then
+			y = y + 1
+			if y+h > game.maph then
+				h = h - 1
+			end
+		end
+	end
+	j = y+h
+	for i = x, x+w do
+		if game.map[mapn][j+1][i] == wall or game.map[mapn][j+1][i] == floor then
+			h = h - 1
+			-- if y < 0 then
+			-- 	y = y + 1
+			-- end
+		end
+	end
+	-- x top, x bottom
+	i = x
+	for j = y, y+h do
+		if game.map[mapn][j][i-1] == wall or game.map[mapn][j][i-1] == floor then
+			x = x + 1
+			if x+w > game.maph then
+				w = w - 1
+			end
+		end
+	end
+	i = x+w
+	for j = y, y+h do
+		if game.map[mapn][j][i+1] == wall or game.map[mapn][j][i+1] == floor then
+			w = w - 1
+			-- if x < 0 then
+			-- 	x = x + 1
+			-- end
+		end
 	end
 
 	-- Lay down the room 
@@ -197,7 +247,7 @@ end
 
 function gen_map(mapn)
 	local tab = {}
-	local i, j
+	local i, j, k, l
 	for j = 1, game.maph do
 		local t = {}
 		for i = 1, game.mapw do
@@ -207,8 +257,21 @@ function gen_map(mapn)
 	end
 	table.insert(maps, mapn, tab)
 
-	for i = 0, 11 do
-		gen_room(mapn)
+	l = true
+	while l do
+		for k = 0, 16 do
+			gen_room(mapn)
+		end
+
+		for i = 1, game.mapw do
+			for j = 1, game.maph do
+				if game.map[mapn][j][i] == wall or game.map[mapn][j][i] == floor
+				then
+
+					l = false
+				end
+			end
+		end
 	end
 end
 
