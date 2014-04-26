@@ -6,7 +6,7 @@ function love.load()
 	ubuntubold = love.graphics.newFont("data/fnt/UbuntuMono-B.ttf", 24)
 	love.graphics.setFont(ubuntubold)
 	variables()
-	map_gen()
+	gen_map(game.mapn)
 end
 
 function love.update(dt)
@@ -20,9 +20,10 @@ end
 function love.keypressed(key, isrepeat)	
 	if not isrepeat then
 		mov_player(key)
-		if key == "g" then
-			room_gen(1)
-		end
+		-- if key == "g" then
+		-- 	room_gen(game.mapn)
+		-- 	print("------------------------------------------")
+		-- end
 	end
 end
 
@@ -48,13 +49,13 @@ function variables()
 	game.ts = 15 -- ?
 
 	gen = {}
-	gen.miRx = 4
-	gen.miRy = 4
+	-- gen.miRx = 4
+	-- gen.miRy = 4
 
-	gen.mxRw = 25
-	gen.mxRh = 26
-	gen.miRw = 4
-	gen.miRh = 4
+	-- gen.mxRw = 25
+	-- gen.mxRh = 26
+	-- gen.miRw = 4
+	-- gen.miRh = 4
 
 	player = {}
 	player.x = 30
@@ -67,7 +68,7 @@ function drw_map()
 		for i = 1, game.mapw do
 			if game.map[game.mapn][j][i] == wall then
 				love.graphics.setColor(100, 100, 100, 255)
-				love.graphics.print("+", i*game.ts-8, j*game.ts-16)
+				love.graphics.print("#", i*game.ts-8, j*game.ts-16)
 			elseif game.map[game.mapn][j][i] == floor then
 				love.graphics.setColor(100, 100, 100, 255)
 				love.graphics.print(".", i*game.ts-8, j*game.ts-16)
@@ -122,76 +123,92 @@ function chk_tile(x, y, dir, tile)
 	return false
 end
 
-function room_gen(mapn)
-	local x = math.random(0+4, game.mapw-4)
-	local y = math.random(0+4, game.maph-4)
-	local w = math.random(gen.miRw, gen.mxRw)
-	local h = math.random(gen.miRh, gen.mxRh)
+function gen_room(mapn)
+	math.randomseed(os.time())
+
+	local x = math.random(1+2, game.mapw-2)
+	local y = math.random(1+2, game.maph-2)
+	local w = math.random(4, 26)
+	local h = math.random(4, 26)
 
 	print("x: " .. x .. " y: " .. y .. " w: " .. w .. " h: " .. h)
 
-	for k = 0, 10 do
+	for k = 0, 11 do
 		if x+w > game.mapw then
-			if k == 11 then
-				print("room generation failed at stage 1 - width")
-				return -1
-			elseif k < 11 then
-				x = math.random(gen.miRx, game.mapw-4)
-				w = math.random(gen.miRw, gen.mxRw)
-				print("regenerating the x coordinate and width")
-			end
+			x = math.random(1+2, game.mapw-2)
+			w = math.random(4, 26)
+			print("regenerating the x coordinate and width")
 		end
 		if y+h > game.maph then
-			if k == 11 then
-				print("room generation failed at stage 1 - height")
-				return -1
-			elseif k < 11 then
-				y = math.random(gen.miRy, game.maph-4)
-				h = math.random(gen.miRh, gen.mxRh)
-				print("regenerating the y coordinate and height")
-			end
+			y = math.random(1+2, game.maph-2)
+			h = math.random(4, 24)
+			print("regenerating the y coordinate and height")
 		end
 	end
 
+	if x+w >= game.mapw or y+h >= game.maph then
+		print("Tried 11 times - Failed")
+		return 0
+	end
+
+	local regen = false
 	for k = 0, 11 do
-		for i = x, w do
-			for j = y, h do
-				if game.map[mapn][j][i] == wall then --or 
-				   --game.map[mapn][j][i] == floor then
-				   	if k == 11 then
-				   		print("room generation failed at stage 2")
-				   		return -1
-				   	elseif k < 11 then
-					    x = math.random(gen.miRx, game.mapw-4)
-						y = math.random(gen.miRy, game.maph-4)
-						w = math.random(gen.miRw, gen.mxRw)
-						h = math.random(gen.miRh, gen.mxRh)
-						print("room overlaps with another room, regenning")
+		regen = false
+		if x+w < game.mapw and y+h < game.maph then
+			for i = x, x+w do
+				for j = y, y+h do
+					print("J: " .. j .. " I: " .. i)
+					if game.map[mapn][j][i] == wall or 
+					   game.map[mapn][j][i] == floor then
+					   	regen = true
+					   	break
 					end
+				end
+				if regen == true then
+					break
 				end
 			end
 		end
+		if x+w >= game.mapw or regen == true then
+			x = math.random(1+2, game.mapw-2)
+			w = math.random(4, 26)
+		end
+		if y+h >= game.maph or regen == true then
+			y = math.random(1+2, game.maph-3)
+			h = math.random(4, 24)
+		end
+	end
+
+	if x+w > game.mapw or y+h > game.maph or regen == true then
+		print("Tried 11 times - Failed")
+		return 0
 	end
 
 	-- Lay down the room 
 	-- doors incoming
-	for i = x, w do
-		for j = y, h do
+	print("placing room")
+	for i = x, x+w do
+		for j = y, y+h do
 			game.map[mapn][j][i] = wall
 		end
 	end
 	return 1
 end
 
-function map_gen()
+function gen_map(mapn)
 	local tab = {}
+	local i, j
 	for j = 1, game.maph do
 		local t = {}
 		for i = 1, game.mapw do
-			table.insert(t, 2)
+			table.insert(t, 0)
 		end
 		table.insert(tab, t)
 	end
-	table.insert(maps, tab)
+	table.insert(maps, mapn, tab)
+
+	for i = 0, 11 do
+		gen_room(mapn)
+	end
 end
 
