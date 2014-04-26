@@ -237,9 +237,45 @@ function gen_room(mapn)
 	-- Lay down the room 
 	-- doors incoming
 	print("placing room")
+	local z = math.random(2, 4)
+	local c
 	for i = x, x+w do
 		for j = y, y+h do
-			game.map[mapn][j][i] = wall
+			if j == y then
+				c = math.random(y, y+w)
+				if c > 2 and c < 10 and z > 0 then
+					game.map[mapn][j][i] = floor
+				else
+					game.map[mapn][j][i] = wall
+				end
+				z = z - 1
+			elseif i == x then
+				c = math.random(x, x+w)
+				if c > 2 and c < 10 and z > 0 then
+					game.map[mapn][j][i] = floor
+				else
+					game.map[mapn][j][i] = wall
+				end
+				z = z - 1
+			elseif i == x+w then
+				c = math.random(x, x+w)
+				if c > 2 and c < 10 and z > 0 then
+					game.map[mapn][j][i] = floor
+				else
+					game.map[mapn][j][i] = wall
+				end
+				z = z - 1
+			elseif j == y+h then
+				c = math.random(y, y+h)
+				if c > 2 and c < 10 and z > 0 then
+					game.map[mapn][j][i] = floor
+				else
+					game.map[mapn][j][i] = wall
+				end
+				z = z - 1
+			else
+				game.map[mapn][j][i] = floor
+			end
 		end
 	end
 	return 1
