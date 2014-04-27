@@ -23,6 +23,20 @@ function mlaslow_weap(dir) -- mining laser low power
 	add_stat("You hear the rock crumble.")
 end
 
+function mlasmid_nos()
+	local k = math.random(0, 2)
+	if k == 0 then
+		add_stat("Zap!")
+		add_stat("You hear the rock cave in.")
+	elseif k == 1 then
+		add_stat("Pew! Pew!")
+		add_stat("You blast the rock out of the way!")
+	elseif k == 2 then
+		add_stat("Bzzzzzzzzssssshh")
+		add_stat("You disintegrate the rock!")
+	end
+end
+
 function mlasmid_weap(dir) -- mining laser low power
 	local j = player.y/game.ts
 	local i = player.x/game.ts
@@ -38,6 +52,9 @@ function mlasmid_weap(dir) -- mining laser low power
 			 game.map[game.mapn][j+1][i-1] = wall
 			 game.map[game.mapn][j-1][i-2] = wall
 			 game.map[game.mapn][j+1][i-2] = wall
+			 mlasmid_nos()
+		else
+			add_stat("The beam fizzles out in the air.")
 		end
 	elseif dir == "down" then
 		if chk_tile(player.x, player.y, "down", wall) or 
@@ -51,6 +68,9 @@ function mlasmid_weap(dir) -- mining laser low power
 			game.map[game.mapn][j+2][i-1] = wall
 			game.map[game.mapn][j+1][i+1] = wall
 			game.map[game.mapn][j+1][i-1] = wall
+			mlasmid_nos()
+		else
+			add_stat("The beam fizzles out in the air.")
 		end
 	elseif dir == "up" then
 		if chk_tile(player.x, player.y, "up", wall) or 
@@ -64,7 +84,9 @@ function mlasmid_weap(dir) -- mining laser low power
 			game.map[game.mapn][j-2][i+1] = wall
 			game.map[game.mapn][j-1][i-1] = wall
 			game.map[game.mapn][j-1][i+1] = wall
-			
+			mlasmid_nos()
+		else
+			add_stat("The beam fizzles out in the air.")
 		end
 	elseif dir == "right" then
 		if chk_tile(player.x, player.y, "right", wall) or
@@ -78,19 +100,12 @@ function mlasmid_weap(dir) -- mining laser low power
 			 game.map[game.mapn][j-1][i+1] = wall
 			 game.map[game.mapn][j+1][i+2] = wall
 			 game.map[game.mapn][j-1][i+2] = wall
+			 mlasmid_nos()
+		else
+			add_stat("The beam fizzles out in the air.")
 		end
 	end
-	local k = math.random(0, 2)
-	if k == 0 then
-		add_stat("Zap!")
-		add_stat("You hear the rock cave in.")
-	elseif k == 1 then
-		add_stat("Pew! Pew!")
-		add_stat("You blast the rock out of the way!")
-	elseif k == 2 then
-		add_stat("Bzzzzzzzzssssshh")
-		add_stat("You disintegrate the rock!")
-	end
+
 end
 
 function fire_weap(dir)
@@ -105,8 +120,4 @@ function fire_weap(dir)
 		add_stat("Nothing to fire!")
 		player.primed = false
 	end
-end
-
-function wield_weap(i)
-	player.wield = player.inv[i][3]
 end
