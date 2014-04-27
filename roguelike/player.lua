@@ -172,15 +172,14 @@ function act_player(key)
 		if key == "p" then 
 			local i
 			for i = 1, #items do
-				print("Bip - i " .. i)
-				-- ERROR ON FOLLOWING LINE:
-				if player.x == items[i][4] and player.y == items[i][5] then
-					table.insert(player.inv, {items[i][1], items[i][2], items[i][3]})
-					player.inv_cnt = player.inv_cnt + 1 
-					add_stat("Picked up " .. items[i][1])
-					table.remove(items, i)
-				end 
-				print("Bop")
+				if items[i] ~= nil then
+					if player.x == items[i][4] and player.y == items[i][5] then
+						table.insert(player.inv, {items[i][1], items[i][2], items[i][3]})
+						player.inv_cnt = player.inv_cnt + 1 
+						add_stat("Picked up " .. items[i][1])
+						table.remove(items, i)
+					end 
+				end
 			end
 		end
 
