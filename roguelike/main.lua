@@ -105,6 +105,7 @@ function variables()
 
 	-- Currently *:
 	player.wield = "MLASMID"
+	player.wield_v = false
 	player.wear = ""
 	-- Weapon primed?
 	player.primed = false

@@ -174,13 +174,23 @@ function act_player(key)
 			for i = 1, #items do
 				if items[i] ~= nil then
 					if player.x == items[i][4] and player.y == items[i][5] then
-						table.insert(player.inv, {items[i][1], items[i][2], items[i][3]})
-						player.inv_cnt = player.inv_cnt + 1 
-						add_stat("Picked up " .. items[i][1])
-						table.remove(items, i)
+						if player.inv_cnt == player._inv_max then
+							add_stat("Your inventory is full!" .. items[i][1])	
+						else
+							table.insert(player.inv, {items[i][1], items[i][2], items[i][3]})
+							player.inv_cnt = player.inv_cnt + 1 
+							add_stat("Picked up " .. items[i][1])
+							table.remove(items, i)
+						end
 					end 
 				end
 			end
+		end
+		if key == "w" then
+			add_stat("What do you want to wield?")
+			player.wield_v = true
+			player.inv_vis = true
+			player.inv_vist = true
 		end
 
 	elseif player.inv_vis and not player.drop then
@@ -241,5 +251,58 @@ function act_player(key)
 				end
 			end
 		end
+	elseif player.inv_vis and player.wield_v then
+		local k = 5
+		if key == "h" then
+			if player.inv_minl > 1 then
+				player.inv_minl = player.inv_minl - k
+				player.inv_maxl = player.inv_maxl - k
+			end
+		elseif key == "l" then
+			if player.inv_maxl < player.inv_cnt then
+				player.inv_minl = player.inv_minl + k
+				player.inv_maxl = player.inv_maxl + k
+			end
+
+		elseif key == " " or key == "i" then
+			add_stat("Never Mind.")
+			player.inv_vis = false
+			player.inv_vist = false
+			player.wield_v = false
+		else
+			local i, j
+			local k = false
+			local w
+			for i = 1, player.inv_cnt do
+				if options[i] == key then
+					-- first check if it's a weapon to wield
+					for j = 1, #weaps do
+						if weaps[j] == player.inv[i][3] then
+							k = true
+						end
+					end
+					if not k then
+						add_stat("Not a weapon!")
+					elseif k then
+						for j = 1, #player.inv do
+							if player.inv[j][2] == "w" then
+								if player.inv[i][3] == player.wield then
+									add_stat("Already wielding that item!")
+									k = false
+								end
+							end
+						end
+						if k then
+							player.wield = player.inv[i][3]
+							add_stat("Wielded" .. player.inv[i][1])
+							break
+						end
+					end
+				end
+			end
+			player.inv_vis = false
+			player.inv_vist = false
+			player.wield_v = false
+		end 
 	end
 end
