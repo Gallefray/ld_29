@@ -87,7 +87,7 @@ function drw_inv(num)
 				else
 					love.graphics.print("> " .. player.inv[i][1], 10, j);
 				end
-			else
+			elseif num then
 				if player.inv[i][2] == "w" then
 					love.graphics.print(k .. ") (W) " .. player.inv[i][1], 10, j);
 				else
@@ -169,14 +169,18 @@ function act_player(key)
 			player.inv_vis = true
 			player.inv_vist = true
 		end
-		if key == "p" then
-			local i, j
+		if key == "p" then 
+			local i
 			for i = 1, #items do
+				print("Bip - i " .. i)
+				-- ERROR ON FOLLOWING LINE:
 				if player.x == items[i][4] and player.y == items[i][5] then
 					table.insert(player.inv, {items[i][1], items[i][2], items[i][3]})
+					player.inv_cnt = player.inv_cnt + 1 
 					add_stat("Picked up " .. items[i][1])
 					table.remove(items, i)
-				end
+				end 
+				print("Bop")
 			end
 		end
 
@@ -217,17 +221,21 @@ function act_player(key)
 			player.drop = false
 		else
 			local k, l, z
-			for k = 1, player._inv_max do
+			for k = 1, player.inv_cnt do
 				if key == options[k] then
 					z = "na"
 					for l = 1, #weaps do
 						if weaps[l] == player.inv[k][3] then
 							z = "nw"
+							if player.wield == player.inv[k][3] then
+								player.wield = ""
+							end
 						end
 					end
 					table.insert(items, {player.inv[k][1], z, player.inv[k][3], player.x, player.y})		
 					add_stat("Dropped " .. player.inv[k][1])
 					table.remove(player.inv, k)
+					player.inv_cnt = player.inv_cnt - 1
 					player.inv_vis = false
 					player.inv_vist = false
 					player.drop = false

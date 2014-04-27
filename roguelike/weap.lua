@@ -101,6 +101,9 @@ function fire_weap(dir)
 	elseif player.wield == "MLASMID" then
 		mlasmid_weap(dir)
 		player.primed = false
+	elseif player.wield == "" then
+		add_stat("Nothing to fire!")
+		player.primed = false
 	end
 end
 
