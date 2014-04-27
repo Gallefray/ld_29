@@ -4,7 +4,6 @@ floor   = 2
 
 maps = {}
 
-
 function drw_map()
 	local i, j
 	for j = 1, game.maph do

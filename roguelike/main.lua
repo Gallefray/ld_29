@@ -36,8 +36,9 @@ function love.draw()
 	drw_map()
 	drw_hud()
 	drw_stat()
+	drw_items()
 	drw_player()
-	drw_inv(false)
+	drw_inv(player.inv_vist)
 
 end
 
@@ -65,38 +66,49 @@ function variables()
 	}
 
 	gen = {}
+	items = {}
+
 	player = {}
 	player.hp = 95
 	player._mhp = 100
 	player.arm = 30
 	player.pwr = 90
 
-	player.inv = {  -- name, wielded?, type      
-		{"Medium Strength Mining Laser", "w", "weap"},
-		{"Low Strength Mining Laser", "nw", "weap"},
-		{"foo", "nw"}, 
-		{"bar", "nw"},
-		{"foobar", "nw"},
-		{"baz", "nw"},
-		{"foo", "nw"}, 
-		{"bar", "nw"},
-		{"foobar", "nw"},
-		{"baz", "nw"},
-		{"foo", "nw"}, 
-		{"bar", "nw"},
-		{"foobar", "nw"},
-		{"baz", "nw"},
-		{"quux", "nw"}
+	player.inv = {  -- name, wield status, type      
+		{"Medium Strength Mining Laser", "w", "MLASMID"},
+		{"Low Strength Mining Laser", "nw", "MLASLOW"},
+		{"item 1", "na", "NONE"}, 
+		{"item 2", "na", "NONE"},
+		{"item 3", "na", "NONE"},
+		{"item 4", "na", "NONE"},
+		{"item 5", "na", "NONE"}, 
+		{"item 6", "na", "NONE"},
+		{"item 7", "na", "NONE"},
+		{"item 8", "na", "NONE"},
+		{"item 9", "na", "NONE"}, 
+		{"item 10", "na", "NONE"},
+		{"item 11", "na", "NONE"},
+		{"item 12", "na", "NONE"},
+		{"item 13", "na", "NONE"}
 	}
-	player.inv_cnt = 15
+	-- See the inv HUD
 	player.inv_vis = false
+	player.inv_vist = false
+	-- Currnt and limit
+	player.inv_cnt = 15
+	player._inv_max = 26 + 9
+	-- HUD values
 	player.inv_maxl = 5
 	player.inv_minl = 1
+	-- Drop things?
+	player.drop = false
 
+	-- Currently *:
 	player.wield = "MLASMID"
-
+	player.wear = ""
+	-- Weapon primed?
 	player.primed = false
-
+	-- Total weapons in game:
 	weaps = {
 		"MLASLOW",
 		"MLASMID"
@@ -162,40 +174,21 @@ function chk_tile(x, y, dir, tile)
 	return false
 end
 
-function drw_inv(num)
-	if player.inv_vis then
-		local i, j
-		love.graphics.setColor(0, 0, 0)
-		love.graphics.rectangle("fill", 10, 5, 400, 200)
+function drw_items()
+	local i, j, k
 
-		love.graphics.setColor(250, 250, 250)
-		love.graphics.print("Inventory (i or spacebar to exit): ", 10, 5);
-		love.graphics.setColor(200, 200, 200)
-		j = 5
-		for i = player.inv_minl, player.inv_maxl do
-			j = j + (5 + 24)
-			if not num then
-				if player.inv[i][2] == "w" then
-					love.graphics.print("> (W) " .. player.inv[i][1], 10, j);
-				else
-					love.graphics.print("> " .. player.inv[i][1], 10, j);
-				end
-			else
-				if player.inv[i][2] == "w" then
-					love.graphics.print(i .. ") (W) " .. player.inv[i][1], 10, j);
-				else
-					love.graphics.print(i .. ") " .. player.inv[i][1], 10, j);
-				end
+	for i = 1, #items do
+		k = "i"
+		for j = 1, #weaps do
+			if items[i][3] == weaps[j] then
+				k = "w"
 			end
 		end
-		j = j + (5 + 24)
-		love.graphics.setColor(225, 225, 225)
-		if player.inv_maxl < #player.inv and player.inv_minl == 1 then
-			love.graphics.print("Next (l) >>>>", 10, j)
-		elseif player.inv_maxl < #player.inv and player.inv_minl > 1 then
-			love.graphics.print("<<<< (h) Prev | Next (l) >>>>", 10, j)
-		elseif player.inv_maxl == #player.inv and player.inv_minl > 1 then
-			love.graphics.print("<<<< (h) Prev", 10, j)
+		if k == "i" then
+			love.graphics.setColor(25, 200, 25)
+		elseif k == "w" then
+			love.graphics.setColor(200, 25, 25)
 		end
+		love.graphics.print(k, items[i][4]-8, items[i][5]-16)
 	end
 end

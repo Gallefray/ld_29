@@ -1,4 +1,42 @@
 
+options = {
+	'1',
+	'2',
+	'3',
+	'4',
+	'5',
+	'6',
+	'7',
+	'8',
+	'9',
+	'a',
+	'b',
+	'c',
+	'd',
+	'e',
+	'f',
+	'g',
+	'h',
+	'i',
+	'j',
+	'k',
+	'l',
+	'm',
+	'n',
+	'o',
+	'p',
+	'q',
+	'r',
+	's',
+	't',
+	'u',
+	'v',
+	'w',
+	'x',
+	'y',
+	'z'
+}
+
 function gen_player(mapn)
 	local i, j, k
 
@@ -19,6 +57,54 @@ end
 function drw_player()
 	love.graphics.setColor(25, 25, 255, 255)
 	love.graphics.print("@", player.x-8, player.y-16)
+end
+
+function drw_inv(num)
+	if player.inv_vis then
+		local i, j, k, l
+		love.graphics.setColor(0, 0, 0)
+		love.graphics.rectangle("fill", 10, 5, 400, 200)
+
+		love.graphics.setColor(250, 250, 250)
+		if not player.drop then
+			love.graphics.print("Inventory (i or spacebar to exit): ", 10, 5)
+		else
+			love.graphics.print("Select item (i or spacebar to exit): ", 10, 5)
+		end
+		love.graphics.setColor(200, 200, 200)
+		j = 5
+		for i = player.inv_minl, player.inv_maxl do
+			j = j + (5 + 24)
+			k = i
+			for l= 1, player._inv_max do
+				if k == l then
+					k = options[l]
+				end
+			end
+			if not num then
+				if player.inv[i][2] == "w" then
+					love.graphics.print("> (W) " .. player.inv[i][1], 10, j);
+				else
+					love.graphics.print("> " .. player.inv[i][1], 10, j);
+				end
+			else
+				if player.inv[i][2] == "w" then
+					love.graphics.print(k .. ") (W) " .. player.inv[i][1], 10, j);
+				else
+					love.graphics.print(k .. ") " .. player.inv[i][1], 10, j);
+				end
+			end
+		end
+		j = j + (5 + 24)
+		love.graphics.setColor(225, 225, 225)
+		if player.inv_maxl < #player.inv and player.inv_minl == 1 then
+			love.graphics.print("Next (l) >>>>", 10, j)
+		elseif player.inv_maxl < #player.inv and player.inv_minl > 1 then
+			love.graphics.print("<<<< (h) Prev | Next (l) >>>>", 10, j)
+		elseif player.inv_maxl == #player.inv and player.inv_minl > 1 then
+			love.graphics.print("<<<< (h) Prev", 10, j)
+		end
+	end
 end
 
 function mov_player(key)
@@ -75,8 +161,26 @@ function act_player(key)
 		end
 		if key == "i" then
 			player.inv_vis = true
+			player.inv_vist = false
 		end
-	elseif player.inv_vis then
+		if key == "d" then
+			add_stat("What do you want to drop?")
+			player.drop = true
+			player.inv_vis = true
+			player.inv_vist = true
+		end
+		if key == "p" then
+			local i, j
+			for i = 1, #items do
+				if player.x == items[i][4] and player.y == items[i][5] then
+					table.insert(player.inv, {items[i][1], items[i][2], items[i][3]})
+					add_stat("Picked up " .. items[i][1])
+					table.remove(items, i)
+				end
+			end
+		end
+
+	elseif player.inv_vis and not player.drop then
 		local k = 5
 		if key == "h" then
 			if player.inv_minl > 1 then
@@ -90,6 +194,45 @@ function act_player(key)
 			end
 		elseif key == " " or key == "i" then
 			player.inv_vis = false
+			player.inv_vist = false
+			add_stat("Never Mind.")
+		end
+	elseif player.inv_vis and player.drop then
+		local k = 5
+		if key == "h" then
+			if player.inv_minl > 1 then
+				player.inv_minl = player.inv_minl - k
+				player.inv_maxl = player.inv_maxl - k
+			end
+		elseif key == "l" then
+			if player.inv_maxl < player.inv_cnt then
+				player.inv_minl = player.inv_minl + k
+				player.inv_maxl = player.inv_maxl + k
+			end
+
+		elseif key == " " or key == "i" then
+			add_stat("Never Mind.")
+			player.inv_vis = false
+			player.inv_vist = false
+			player.drop = false
+		else
+			local k, l, z
+			for k = 1, player._inv_max do
+				if key == options[k] then
+					z = "na"
+					for l = 1, #weaps do
+						if weaps[l] == player.inv[k][3] then
+							z = "nw"
+						end
+					end
+					table.insert(items, {player.inv[k][1], z, player.inv[k][3], player.x, player.y})		
+					add_stat("Dropped " .. player.inv[k][1])
+					table.remove(player.inv, k)
+					player.inv_vis = false
+					player.inv_vist = false
+					player.drop = false
+				end
+			end
 		end
 	end
 end
