@@ -14,27 +14,7 @@ options = {
 	'c',
 	'd',
 	'e',
-	'f',
-	'g',
-	'h',
-	'i',
-	'j',
-	'k',
-	'l',
-	'm',
-	'n',
-	'o',
-	'p',
-	'q',
-	'r',
-	's',
-	't',
-	'u',
-	'v',
-	'w',
-	'x',
-	'y',
-	'z'
+	'f'
 }
 
 function gen_player(mapn)
@@ -66,10 +46,12 @@ function drw_inv(num)
 		love.graphics.rectangle("fill", 10, 5, 400, 200)
 
 		love.graphics.setColor(250, 250, 250)
-		if not player.drop then
-			love.graphics.print("Inventory (i or spacebar to exit): ", 10, 5)
-		else
+		if not player.drop and player.wield_v then
+			love.graphics.print("Wield (i or spacebar to exit): ", 10, 5)
+		elseif player.drop then
 			love.graphics.print("Select item (i or spacebar to exit): ", 10, 5)
+		else
+			love.graphics.print("Inventory (i or spacebar to exit): ", 10, 5)
 		end
 		love.graphics.setColor(200, 200, 200)
 		j = 5
@@ -193,7 +175,7 @@ function act_player(key)
 			player.inv_vist = true
 		end
 
-	elseif player.inv_vis and not player.drop then
+	elseif player.inv_vis and not player.drop and not player.wield_v then
 		local k = 5
 		if key == "h" then
 			if player.inv_minl > 1 then
@@ -270,32 +252,35 @@ function act_player(key)
 			player.inv_vist = false
 			player.wield_v = false
 		else
-			local i, j
-			local k = false
-			local w
-			for i = 1, player.inv_cnt do
-				if options[i] == key then
-					-- first check if it's a weapon to wield
-					for j = 1, #weaps do
-						if weaps[j] == player.inv[i][3] then
-							k = true
-						end
+			local k, j
+			local b = false
+			for k = 1, player.inv_cnt do
+				if key == options[k] then
+					-- Check if it's not already wielded
+					if player.inv[k][3] == player.wield then
+						add_stat("You are already wielding that item.")
+						b = true
 					end
-					if not k then
-						add_stat("Not a weapon!")
-					elseif k then
-						for j = 1, #player.inv do
-							if player.inv[j][2] == "w" then
-								if player.inv[i][3] == player.wield then
-									add_stat("Already wielding that item!")
-									k = false
-								end
+					if not b then
+						b = false
+						-- check if it's a weapon
+						for j = 1, #weaps do
+							if player.inv[k][3] == weaps[j] then
+								b = true
+								break
 							end
 						end
-						if k then
-							player.wield = player.inv[i][3]
-							add_stat("Wielded" .. player.inv[i][1])
-							break
+						if b then
+							-- swap the inventory menu wield icon
+							for j = 1, player.inv_cnt do
+								if player.inv[j][3] == player.wield then
+									player.inv[j][2] = "nw"
+								end
+							end
+							player.inv[k][2] = "w"
+							player.wield = player.inv[k][3]
+						else
+							add_stat("The item you selected is not a weapon.")
 						end
 					end
 				end

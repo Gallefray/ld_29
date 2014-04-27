@@ -77,7 +77,7 @@ function variables()
 	player.inv = {  -- name, wield status, type      
 		{"Medium Strength Mining Laser", "w", "MLASMID"},
 		{"Low Strength Mining Laser", "nw", "MLASLOW"},
-		{"item 1", "na", "NONE"}, 
+		{"Body Armour", "W", "BODARM"}, 
 		{"item 2", "na", "NONE"},
 		{"item 3", "na", "NONE"},
 		{"item 4", "na", "NONE"},
@@ -113,6 +113,10 @@ function variables()
 	weaps = {
 		"MLASLOW",
 		"MLASMID"
+	}
+	-- Total armour in game:
+	arms = {
+		"BODARM"
 	}
 end
 
