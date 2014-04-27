@@ -23,8 +23,6 @@ function love.load()
 	gen_map(game.mapn)
 	gen_player(game.mapn)
 	gen_AI(game.mapn)
-	gen_AI(game.mapn)
-	gen_AI(game.mapn)
 end
 
 function love.update(dt)
@@ -33,12 +31,22 @@ function love.update(dt)
 		love.event.quit()
 	end
 	mov_player(dt)
+	if turn >= 2 then
+		act_ai()
+		turn = 0
+	end
 end
 
 function love.keypressed(key, isrepeat)	
 	if not isrepeat then
 		mov_player(key)
 		act_player(key)
+		if not player.primed and not player.inv_vis then
+			if turn < 2 then
+				turn_step = math.random(1, 1.9)
+				turn = turn + turn_step
+			end
+		end
 	end
 end
 
@@ -48,12 +56,15 @@ function love.draw()
 	drw_stat()
 	drw_items()
 	drw_player()
-	drw_AI()
+	drw_ai()
 	drw_inv(player.inv_vist)
 end
 
 function variables()
 	love.window.setTitle("LD29")
+
+	turn = 0
+	turn_step = 0
 
 	screen = {}
 	screen.w = love.window.getWidth()
@@ -89,16 +100,21 @@ function variables()
 	_ai_n = {
 		-- nam
 		troll = 1,
-		slug = 2
+		slug = 2,
+		grue = 3,
+		alien = 4
 	}
 	_ai_t = {
 		-- multipliers:
-		troll = 1.3,
-		slug = 1
+		1.3,
+		1,
+		2,
+		2.5
 	}
 	_ai_stat = {
 		["flee"] = 1,
-		["fight"] = 2
+		["fight"] = 2,
+		["inert"] = 3
 	}
 
 	player = {}
@@ -225,11 +241,11 @@ function gen_AI(mapn)
 	-- data is packed into the table like:
 	-- {mname, x, y, attack, hp, state}
 	local mname = math.random(1, #_ai_n)
-	local attack = math.random(ai_dat.mindmg*mapn,
-							   ai_dat.maxdmg*mapn)
-	local hp = math.random(ai_dat.minhp*mapn,
-						   ai_dat.maxhp*mapn)
-	local state = math.random(1, 2)
+	local attack = math.random((ai_dat.mindmg*mapn)*_ai_t[mname],
+							   (ai_dat.maxdmg*mapn)*_ai_t[mname])
+	local hp = math.random(ai_dat.minhp*mapn*_ai_t[mname],
+						   ai_dat.maxhp*mapn*_ai_t[mname])
+	local state = _ai_stat["inert"]
 
 	local loc = {}
 	for i = 1, game.mapw do
@@ -241,13 +257,10 @@ function gen_AI(mapn)
 	end
 
 	local k = math.random(1, #loc)
-
 	table.insert(ai, {nam=mname, x=loc[k].x*game.ts, y=loc[k].y*game.ts, atk=attack, hp=hp, state=state})
-	-- add_stat(loc[k].x*game.ts .. "  " .. loc[k].y*game.ts)
-	-- print(player.x .. "  " .. player.y)
 end
 
-function drw_AI()
+function drw_ai()
 	local i
 	for i = 1, #ai do
 		love.graphics.setColor(255, 255, 255, 255)
@@ -257,7 +270,87 @@ function drw_AI()
 		elseif ai[i].nam == _ai_n.slug then
 			colorize(ai[i].hp)
 			love.graphics.print("T", ai[i].x-8, ai[i].y-16)
+		elseif ai[i].nam == _ai_n.grue then
+			colorize(ai[i].hp)
+			love.graphics.print("G", ai[i].x-8, ai[i].y-16)
+		elseif ai[i].nam == _ai_n.alien then
+			colorize(ai[i].hp)
+			love.graphics.print("A", ai[i].x-8, ai[i].y-16)
 		end
 	end
 	--print(player.x .. "  " .. player.y)
+end
+
+function act_ai()
+	local i 
+	local DIST = 15*6
+
+	for i = 1, #ai do
+		print("i: " .. i)
+		print("HP: " .. (ai[i].hp/(ai_dat.maxhp*game.mapn*_ai_t[ai[i].nam]))*100)
+
+		if ai[i].state == _ai_stat["inert"] then
+			print("inert")
+			if player.x < ai[i].x+DIST and player.x > ai[i].x-DIST and
+			   player.y < ai[i].y+DIST and player.y > ai[i].y-DIST then
+
+			    if (ai[i].hp/(ai_dat.maxhp*game.mapn*_ai_t[ai[i].nam]))*100 < 100 then
+			    	ai[i].state = _ai_stat["flee"]
+			    else
+			    	ai[i].state = _ai_stat["fight"]
+			    end
+			end
+		elseif ai[i].state == _ai_stat["flee"] then
+			print("flee")
+			if player.x > ai[i].x then
+				print("Moving left")
+				mov_ai(i, "left")
+			elseif player.y < ai[i].y then
+				print("Moving down")
+				mov_ai(i, "down")
+			elseif player.y > ai[i].y then
+				print("Moving up")
+				mov_ai(i, "up")
+			elseif player.x < ai[i].x then
+				print("Moving right")
+				mov_ai(i, "right")
+			end
+
+		elseif ai[i].state == _ai_stat["fight"] then
+			print("fight")
+			if ai[i].nam == _ai_n.alien then
+				-- get player - alien distance and randomize between 
+				-- dist/3 and dist for firing gun
+			else
+				-- if player.x < ai[i].x-
+			end
+		end
+	end
+end
+
+function mov_ai(i, dir)
+	local nx = ai[i].x
+	local ny = ai[i].y
+	if dir == "left" then
+		if not chk_tile(nx, ny, "left", wall) and 
+			   chk_tile(nx, ny, "left", floor) then
+			ai[i].x = ai[i].x - game.ts
+		end
+	elseif dir == "right" then
+		if not chk_tile(nx, ny, "right", wall) and
+			   chk_tile(nx, ny, "right", floor) then
+			ai[i].x = ai[i].x + game.ts
+		end
+	end
+	if dir == "down" then
+		if not chk_tile(nx, ny, "down", wall) and
+			   chk_tile(nx, ny, "down", floor) then
+			ai[i].y = ai[i].y + game.ts
+		end
+	elseif dir == "up" then
+		if not chk_tile(nx, ny, "up", wall) and
+			   chk_tile(nx, ny, "up", floor) then
+			ai[i].y = ai[i].y - game.ts
+		end
+	end
 end

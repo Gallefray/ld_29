@@ -291,6 +291,7 @@ function act_player(key)
 							end
 							player.inv[k][2] = "w"
 							player.wield = player.inv[k][3]
+							add_stat("You wielded the " .. player.inv[k][1])
 						else
 							add_stat("The item you selected is not a weapon.")
 						end
