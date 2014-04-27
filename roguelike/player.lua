@@ -56,28 +56,37 @@ function drw_inv(num)
 		love.graphics.setColor(200, 200, 200)
 		j = 5
 		for i = player.inv_minl, player.inv_maxl do
-			j = j + (5 + 24)
-			k = i
-			for l= 1, player._inv_max do
-				if k == l then
-					k = options[l]
+			if i <= player.inv_cnt then
+				j = j + (5 + 24)
+				k = i
+				for l= 1, player._inv_max do
+					if k == l then
+						k = options[l]
+					end
 				end
-			end
-			if not num then
-				if player.inv[i][2] == "w" then
-					love.graphics.print("> (W) " .. player.inv[i][1], 10, j);
-				else
-					love.graphics.print("> " .. player.inv[i][1], 10, j);
+				if not num then
+					print("--")
+					print("player.inv_minl: " .. player.inv_minl)
+					print("player.maxl:" .. player.inv_maxl)
+					print("player.max:" .. player._inv_max)
+					print("player.cnt:" .. player.inv_cnt)
+					if player.inv[i][2] == "w" then
+						love.graphics.print("> (W) " .. player.inv[i][1], 10, j);
+					else
+						love.graphics.print("> " .. player.inv[i][1], 10, j);
+					end
+				elseif num then
+					if player.inv[i][2] == "w" then
+						love.graphics.print(k .. ") (W) " .. player.inv[i][1], 10, j);
+					else
+						love.graphics.print(k .. ") " .. player.inv[i][1], 10, j);
+					end
 				end
-			elseif num then
-				if player.inv[i][2] == "w" then
-					love.graphics.print(k .. ") (W) " .. player.inv[i][1], 10, j);
-				else
-					love.graphics.print(k .. ") " .. player.inv[i][1], 10, j);
-				end
+			elseif i > player.inv_cnt then
+				break
 			end
 		end
-		j = j + (5 + 24)
+		j = (5 + 24)*6
 		love.graphics.setColor(225, 225, 225)
 		if player.inv_maxl < #player.inv and player.inv_minl == 1 then
 			love.graphics.print("Next (l) >>>>", 10, j)
@@ -289,5 +298,8 @@ function act_player(key)
 			player.inv_vist = false
 			player.wield_v = false
 		end 
+		-- while player.inv_maxl > player.inv_cnt do
+		-- 	player.inv_maxl = player.inv_maxl - 1
+		-- end
 	end
 end

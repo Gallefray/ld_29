@@ -243,8 +243,8 @@ function gen_AI(mapn)
 	local k = math.random(1, #loc)
 
 	table.insert(ai, {nam=mname, x=loc[k].x*game.ts, y=loc[k].y*game.ts, atk=attack, hp=hp, state=state})
-	add_stat(loc[k].x*game.ts .. "  " .. loc[k].y*game.ts)
-	print(player.x .. "  " .. player.y)
+	-- add_stat(loc[k].x*game.ts .. "  " .. loc[k].y*game.ts)
+	-- print(player.x .. "  " .. player.y)
 end
 
 function drw_AI()
@@ -259,5 +259,5 @@ function drw_AI()
 			love.graphics.print("T", ai[i].x-8, ai[i].y-16)
 		end
 	end
-	print(player.x .. "  " .. player.y)
+	--print(player.x .. "  " .. player.y)
 end
