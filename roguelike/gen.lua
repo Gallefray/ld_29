@@ -51,22 +51,22 @@ function gen_room(mapn)
 					   	break
 					end
 				end
-				if regen == true then
+				if regen then
 					break
 				end
 			end
 		end
-		if x+w >= game.mapw or regen == true then
+		if x+w >= game.mapw or regen then
 			x = math.random(min_rx, max_rx)
 			w = math.random(min_rw, max_rw)
 		end
-		if y+h >= game.maph or regen == true then
+		if y+h >= game.maph or regen then
 			y = math.random(min_ry, max_ry)
 			h = math.random(min_rh, max_rh)
 		end
 	end
 
-	if x+w > game.mapw or y+h > game.maph or regen == true then
+	if x+w > game.mapw or y+h > game.maph or regen then
 		-- print("Tried 11 times - Failed")
 		return 0
 	end

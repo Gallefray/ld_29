@@ -37,6 +37,8 @@ function love.draw()
 	drw_hud()
 	drw_stat()
 	drw_player()
+	drw_inv(false)
+
 end
 
 function variables()
@@ -56,10 +58,10 @@ function variables()
 	game.ts = 15 -- ?
 
 	status = {
-		"",
-		"",
-		"",
-		""
+		" ",
+		" ",
+		" ",
+		" "
 	}
 
 	gen = {}
@@ -68,8 +70,31 @@ function variables()
 	player._mhp = 100
 	player.arm = 30
 	player.pwr = 90
-	player.inv = {} -- Entries have 
+
+	player.inv = {  -- name, wielded?, type      
+		{"Medium Strength Mining Laser", "w", "weap"},
+		{"Low Strength Mining Laser", "nw", "weap"},
+		{"foo", "nw"}, 
+		{"bar", "nw"},
+		{"foobar", "nw"},
+		{"baz", "nw"},
+		{"foo", "nw"}, 
+		{"bar", "nw"},
+		{"foobar", "nw"},
+		{"baz", "nw"},
+		{"foo", "nw"}, 
+		{"bar", "nw"},
+		{"foobar", "nw"},
+		{"baz", "nw"},
+		{"quux", "nw"}
+	}
+	player.inv_cnt = 15
+	player.inv_vis = false
+	player.inv_maxl = 5
+	player.inv_minl = 1
+
 	player.wield = "MLASMID"
+
 	player.primed = false
 
 	weaps = {
@@ -114,6 +139,11 @@ function drw_hud()
 	love.graphics.print(player.pwr, 64, (game.maph+2.7)*game.ts)
 	love.graphics.setColor(150, 150, 150, 255)
 	love.graphics.print("LVL: " .. game.mapn, 15, (game.maph+4.2)*game.ts)
+
+	love.graphics.setColor(150, 150, 150, 255)
+	love.graphics.print("ARM: ", 125, (game.maph+1.2)*game.ts)
+	colorize(player.arm)
+	love.graphics.print(player.arm, 125+53, (game.maph+1.2)*game.ts)
 end
 
 -- I could clean up a lot of code by using this function, something for day 3!
@@ -130,4 +160,42 @@ function chk_tile(x, y, dir, tile)
 		return (game.map[game.mapn][j][i+1] == tile)
 	end
 	return false
+end
+
+function drw_inv(num)
+	if player.inv_vis then
+		local i, j
+		love.graphics.setColor(0, 0, 0)
+		love.graphics.rectangle("fill", 10, 5, 400, 200)
+
+		love.graphics.setColor(250, 250, 250)
+		love.graphics.print("Inventory (i or spacebar to exit): ", 10, 5);
+		love.graphics.setColor(200, 200, 200)
+		j = 5
+		for i = player.inv_minl, player.inv_maxl do
+			j = j + (5 + 24)
+			if not num then
+				if player.inv[i][2] == "w" then
+					love.graphics.print("> (W) " .. player.inv[i][1], 10, j);
+				else
+					love.graphics.print("> " .. player.inv[i][1], 10, j);
+				end
+			else
+				if player.inv[i][2] == "w" then
+					love.graphics.print(i .. ") (W) " .. player.inv[i][1], 10, j);
+				else
+					love.graphics.print(i .. ") " .. player.inv[i][1], 10, j);
+				end
+			end
+		end
+		j = j + (5 + 24)
+		love.graphics.setColor(225, 225, 225)
+		if player.inv_maxl < #player.inv and player.inv_minl == 1 then
+			love.graphics.print("Next (l) >>>>", 10, j)
+		elseif player.inv_maxl < #player.inv and player.inv_minl > 1 then
+			love.graphics.print("<<<< (h) Prev | Next (l) >>>>", 10, j)
+		elseif player.inv_maxl == #player.inv and player.inv_minl > 1 then
+			love.graphics.print("<<<< (h) Prev", 10, j)
+		end
+	end
 end

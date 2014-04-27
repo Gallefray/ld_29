@@ -22,7 +22,7 @@ function drw_player()
 end
 
 function mov_player(key)
-	if not player.primed then
+	if not player.primed and not player.inv_vis then
 		local px = player.x
 		local py = player.y
 		if key == "h" then
@@ -50,29 +50,46 @@ function mov_player(key)
 end
 
 function act_player(key)
-	if player.primed == true then
-		if key == 'h' then
+	if player.primed and not player.inv_vis then
+		if key == "h" then
 			fire_weap("left")
-		elseif key == 'j' then
+		elseif key == "j" then
 			fire_weap("down")
-		elseif key == 'k' then
+		elseif key == "k" then
 			fire_weap("up")
-		elseif key == 'l' then
+		elseif key == "l" then
 			fire_weap("right")
 		else
 			add_stat("Invalid direction!")
 			primed = false
 		end
-	else
+	elseif not player.primed and not player.inv_vis then
 		local k
-		if key == 'g' then
+		if key == "g" then
 			for k = 0, #weaps do
 				if player.weild == weaps[k] then
-					print("bloop")
 					player.primed = true
 					add_stat("Pick a direction to fire in.")
 				end
 			end
+		end
+		if key == "i" then
+			player.inv_vis = true
+		end
+	elseif player.inv_vis then
+		local k = 5
+		if key == "h" then
+			if player.inv_minl > 1 then
+				player.inv_minl = player.inv_minl - k
+				player.inv_maxl = player.inv_maxl - k
+			end
+		elseif key == "l" then
+			if player.inv_maxl < player.inv_cnt then
+				player.inv_minl = player.inv_minl + k
+				player.inv_maxl = player.inv_maxl + k
+			end
+		elseif key == " " or key == "i" then
+			player.inv_vis = false
 		end
 	end
 end
