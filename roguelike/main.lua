@@ -101,7 +101,7 @@ function variables()
 		-- nam
 		troll = 1,
 		slug = 2,
-		grue = 3,
+		grue = 3,	-- You are likely to be eaten by a grue... etc
 		alien = 4
 	}
 	_ai_t = {
@@ -286,43 +286,69 @@ function act_ai()
 	local DIST = 15*6
 
 	for i = 1, #ai do
-		print("i: " .. i)
-		print("HP: " .. (ai[i].hp/(ai_dat.maxhp*game.mapn*_ai_t[ai[i].nam]))*100)
+		-- print("i: " .. i)
+		-- print("HP: " .. (ai[i].hp/(ai_dat.maxhp*game.mapn*_ai_t[ai[i].nam]))*100)
 
 		if ai[i].state == _ai_stat["inert"] then
-			print("inert")
+			-- print("inert")
 			if player.x < ai[i].x+DIST and player.x > ai[i].x-DIST and
 			   player.y < ai[i].y+DIST and player.y > ai[i].y-DIST then
 
-			    if (ai[i].hp/(ai_dat.maxhp*game.mapn*_ai_t[ai[i].nam]))*100 < 100 then
+			    if (ai[i].hp/(ai_dat.maxhp*game.mapn*_ai_t[ai[i].nam]))*100 < 25 then
 			    	ai[i].state = _ai_stat["flee"]
 			    else
 			    	ai[i].state = _ai_stat["fight"]
 			    end
 			end
 		elseif ai[i].state == _ai_stat["flee"] then
-			print("flee")
-			if player.x > ai[i].x then
-				print("Moving left")
-				mov_ai(i, "left")
-			elseif player.y < ai[i].y then
-				print("Moving down")
-				mov_ai(i, "down")
-			elseif player.y > ai[i].y then
-				print("Moving up")
-				mov_ai(i, "up")
-			elseif player.x < ai[i].x then
-				print("Moving right")
-				mov_ai(i, "right")
+			if player.x < ai[i].x+DIST and player.x > ai[i].x-DIST and
+			   player.y < ai[i].y+DIST and player.y > ai[i].y-DIST then
+				if player.x > ai[i].x then
+					mov_ai(i, "left")
+				elseif player.y < ai[i].y then
+					mov_ai(i, "down")
+				elseif player.y > ai[i].y then
+					mov_ai(i, "up")
+				elseif player.x < ai[i].x then
+					mov_ai(i, "right")
+				end
 			end
 
 		elseif ai[i].state == _ai_stat["fight"] then
-			print("fight")
-			if ai[i].nam == _ai_n.alien then
-				-- get player - alien distance and randomize between 
-				-- dist/3 and dist for firing gun
-			else
-				-- if player.x < ai[i].x-
+			local DIST = 15*8
+			if player.x < ai[i].x+DIST and player.x > ai[i].x-DIST and
+			   player.y < ai[i].y+DIST and player.y > ai[i].y-DIST then
+				if ai[i].nam == _ai_n.alien then
+					-- get player - alien distance and randomize between 
+					-- dist/3 and dist for firing gun
+				else
+					local px = player.x/game.ts
+					local py = player.y/game.ts
+					local ax = ai[i].x/game.ts
+					local ay = ai[i].y/game.ts
+
+					-- left, down, up right
+					if ax-1 == px and ay == py then
+						add_stat("The " .. ai[i].nam .. " attacks you! (left)")
+					elseif ax == px and ay+1 == py then
+						add_stat("The " .. ai[i].nam .. " attacks you! (down)")
+					elseif ax == px and ay-1 == py then
+						add_stat("The " .. ai[i].nam .. " attacks you! (up)")
+					elseif ax+1 == px and ay == py then
+						add_stat("The " .. ai[i].nam .. " attacks you! (right)")
+					else
+						if player.x > ai[i].x then
+							mov_ai(i, "right")
+						elseif player.y < ai[i].y then
+							mov_ai(i, "up")
+						end
+						if player.y > ai[i].y then
+							mov_ai(i, "down")
+						elseif player.x < ai[i].x then
+							mov_ai(i, "left")
+						end
+					end
+				end
 			end
 		end
 	end
