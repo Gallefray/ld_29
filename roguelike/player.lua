@@ -42,6 +42,7 @@ end
 function drw_inv(num)
 	if player.inv_vis then
 		local i, j, k, l
+		local z = false
 		love.graphics.setColor(0, 0, 0)
 		love.graphics.rectangle("fill", 10, 5, 400, 200)
 
@@ -83,6 +84,7 @@ function drw_inv(num)
 					end
 				end
 			elseif i > player.inv_cnt then
+				z = true
 				break
 			end
 		end
@@ -92,7 +94,8 @@ function drw_inv(num)
 			love.graphics.print("Next (l) >>>>", 10, j)
 		elseif player.inv_maxl < #player.inv and player.inv_minl > 1 then
 			love.graphics.print("<<<< (h) Prev | Next (l) >>>>", 10, j)
-		elseif player.inv_maxl == #player.inv and player.inv_minl > 1 then
+		elseif player.inv_maxl == #player.inv and player.inv_minl > 1 or 
+			z == true then
 			love.graphics.print("<<<< (h) Prev", 10, j)
 		end
 	end
