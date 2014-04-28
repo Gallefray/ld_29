@@ -185,3 +185,82 @@ function gen_map(mapn)
 		end
 	end
 end
+
+
+function gen_money(mapn)
+	local i, j, k
+	local x, y, pnt
+	local loc = {}
+	for i = 1, game.mapw do
+		for j = 1, game.maph do
+			if game.map[mapn][j][i] == floor then
+				table.insert(loc, {x=i, y=j})
+			end
+		end
+	end
+
+	k = math.random(1, #loc)
+	x = loc[k].x*game.ts
+	y = loc[k].y*game.ts 
+	pnt = math.random(player.score_min*game.mapn, player.score_max*game.mapn)
+	table.insert(items, {nil, nil, "MONEY", x, y, pnt})
+end
+
+function gen_strdwn(mapn)
+	local i, j, k
+	local loc = {}
+	for i = 1, game.mapw do
+		for j = 1, game.maph do
+			if game.map[mapn][j][i] == floor then
+				table.insert(loc, {x=i, y=j})
+			end
+		end
+	end
+
+	k = math.random(1, #loc)
+	dwndoor.x = loc[k].x*game.ts
+	dwndoor.y = loc[k].y*game.ts
+end
+
+function gen_prpk(mapn)
+	local i, j, k
+	local x, y, pwr
+	local loc = {}
+	for i = 1, game.mapw do
+		for j = 1, game.maph do
+			if game.map[mapn][j][i] == floor then
+				table.insert(loc, {x=i, y=j})
+			end
+		end
+	end
+
+	k = math.random(1, #loc)
+	x = loc[k].x*game.ts
+	y = loc[k].y*game.ts 
+	pwr = math.random(player.power_min*game.mapn, player.power_max*game.mapn)
+	table.insert(items, {"Powerpack x2000 (tm)", nil, "POWER", x, y, pwr})
+end
+
+function get_mast(mapn)
+	local e_max = 3*mapn
+	local e_min = 1*mapn
+	local e = math.random(e_min, e_max)
+	local m_max = 3*mapn
+	local m_min = 1*mapn
+	local m = math.random(m_min, m_max)
+	local pp = math.random(0, 1)
+	gen_map(game.mapn)
+	gen_player(game.mapn)
+	while e > 0 do
+		gen_ai(game.mapn)
+		e = e - 1
+	end
+	while m > 0 do
+		gen_money(game.mapn)
+		m = m - 1
+	end
+	if pp == 1 then
+		gen_prpk(game.mapn)
+	end
+	gen_strdwn(game.mapn)
+end

@@ -22,11 +22,7 @@ function love.load()
 	require 'ai'
 
 	gen_map(1)
-	gen_map(game.mapn)
-	gen_player(game.mapn)
-	gen_ai(game.mapn)
-	gen_money(game.mapn)
-	gen_prpk(game.mapn)
+	get_mast(game.mapn)
 end
 
 function love.update(dt)
@@ -59,6 +55,7 @@ function love.draw()
 	drw_hud()
 	drw_stat()
 	drw_items()
+	drw_doors()
 	drw_player()
 	drw_ai()
 	drw_inv(player.inv_vist)
@@ -120,7 +117,7 @@ function variables()
 		1.3,
 		1,
 		2,
-		2.5
+		2.2
 	}
 	_ai_stat = {
 		["flee"] = 1,
@@ -172,6 +169,9 @@ function variables()
 		"MLASLOW",
 		"MLASMID"
 	}
+
+	updoor = {x=0, y=0}
+	dwndoor = {x=0, y=0}
 end
 
 function colorize(i)
@@ -257,40 +257,10 @@ function drw_items()
 	end
 end
 
-function gen_money(mapn)
-	local i, j, k
-	local x, y, pnt
-	local loc = {}
-	for i = 1, game.mapw do
-		for j = 1, game.maph do
-			if game.map[mapn][j][i] == floor then
-				table.insert(loc, {x=i, y=j})
-			end
-		end
+function drw_doors()
+	love.graphics.setColor(170, 170, 170)
+	if game.mapn > 1 then
+		love.graphics.print("<", updoor.x-8, updoor.y-16)
 	end
-
-	k = math.random(1, #loc)
-	x = loc[k].x*game.ts
-	y = loc[k].y*game.ts 
-	pnt = math.random(player.score_min*game.mapn, player.score_max*game.mapn)
-	table.insert(items, {nil, nil, "MONEY", x, y, pnt})
-end
-
-function gen_prpk(mapn)
-	local i, j, k
-	local x, y, pwr
-	local loc = {}
-	for i = 1, game.mapw do
-		for j = 1, game.maph do
-			if game.map[mapn][j][i] == floor then
-				table.insert(loc, {x=i, y=j})
-			end
-		end
-	end
-
-	k = math.random(1, #loc)
-	x = loc[k].x*game.ts
-	y = loc[k].y*game.ts 
-	pwr = math.random(player.power_min*game.mapn, player.power_max*game.mapn)
-	table.insert(items, {"Powerpack x2000 (tm)", nil, "POWER", x, y, pwr})
+	love.graphics.print(">", dwndoor.x-8, dwndoor.y-16)
 end

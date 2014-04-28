@@ -19,10 +19,12 @@ function drw_map()
 			elseif game.map[game.mapn][j][i] == floor then
 				love.graphics.setColor(50, 50, 50, 255)
 				love.graphics.print(".", i*game.ts-8, j*game.ts-16)
-			elseif game.map[game.mapn][j][i] == doorup then
-				love.graphics.setColor(50, 50, 50, 255)
-				love.graphics.print(".", i*game.ts-8, j*game.ts-16)
-			    
+			-- elseif game.map[game.mapn][j][i] == doorup then
+			-- 	love.graphics.setColor(50, 50, 50, 255)
+			-- 	love.graphics.print("<", i*game.ts-8, j*game.ts-16)
+			-- elseif game.map[game.mapn][j][i] == doordwn then
+			-- 	love.graphics.setColor(50, 50, 50, 255)
+			-- 	love.graphics.print(">", i*game.ts-8, j*game.ts-16)
 			end
 		end
 	end

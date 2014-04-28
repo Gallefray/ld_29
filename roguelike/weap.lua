@@ -59,9 +59,15 @@ function mlasmid_weap(dir) -- mining laser low power
 	elseif dir == "down" then
 		if chk_tile(player.x, player.y, "down", wall) or 
 		   chk_tile(player.x, player.y, "down", air) then
-		    if game.map[game.mapn][j+2][i] == air then
-		    	game.map[game.mapn][j+3][i] = wall
-		    end
+		    if j+2 < game.maph then
+			    if game.map[game.mapn][j+2][i] == air then
+			    	if j+3 <= game.maph then
+			    		game.map[game.mapn][j+3][i] = wall
+			    	else
+			    		game.map[game.mapn][j+2][i] = wall
+			    	end
+			    end
+			end
 			game.map[game.mapn][j+1][i] = floor
 			game.map[game.mapn][j+2][i] = floor
 			game.map[game.mapn][j+2][i+1] = wall
