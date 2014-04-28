@@ -121,9 +121,13 @@ function act_ai()
 							end
 						end
 					end
+					if (ai[i].hp/(ai_dat.maxhp*game.mapn*_ai_t[ai[i].nam]))*100 < 50 then
+					    ai[i].state = _ai_stat["flee"]
+					end
 				end
 				if ai[i].hp < 0 then
 					ai[i].alive = false
+					die_ai(i)
 				end
 			end
 		end
@@ -159,8 +163,8 @@ end
 
 function atk_ai(i) -- ai -> player
 	name = _ai_hn[ai[i].nam]
-	j = math.random(0, 2) -- 1 in 3 chance of getting hit (on... ;_;)
-	if j == 0 then
+	j = math.random(0, 3) -- 1 in 3 chance of getting hit (on... ;_;)
+	if j < 1 then
 		local loss = math.random(ai[i].atkmin, ai[i].atkmax)
 		add_stat("The " .. name .. " attacked you!")
 		add_stat("You lose " .. loss .. " HP!")
@@ -172,9 +176,9 @@ end
 
 function atk_player(i)
 	local name = _ai_hn[ai[i].nam]
-	local j = math.random(0, 2) -- 1 in 3 chance of hitting (it off... ;_;)
+	local j = math.random(0.0, 1) -- 1 in 3 chance of hitting (it off... ;_;)
 	local min, max, k
-	if j == 0 then
+	if j < .5 then
 		for k = 1, #player.inv do
 			print("Bleep")
 			if player.inv[k][2] == "w" then
@@ -200,11 +204,12 @@ function die_ai(i)
 		s = ":"
 	elseif name == _ai_n.troll then
 		s = "&"
-	elseif name == _ai_m.grue then
+	elseif name == _ai_n.grue then
 		s = "~"
 	elseif name == _ai_n.alien then
 		s = "%"
 	end
-	table.insert(items, {_ai_hn[ai[i].nam] .. " corpse", "c ", "NONE", ai[i].x, ai[i].y, s})
+	table.insert(items, {_ai_hn[ai[i].nam] .. " corpse", "c", "FOOD", ai[i].x, ai[i].y, s})
 	table.remove(ai, i)
 end
+  

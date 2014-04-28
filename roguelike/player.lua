@@ -47,16 +47,18 @@ function drw_inv(num)
 		love.graphics.rectangle("fill", 10, 5, 400, 200)
 
 		love.graphics.setColor(250, 250, 250)
-		if not player.drop and player.wield_v then
+		if player.wield_v then
 			love.graphics.print("Wield (i or spacebar to exit): ", 10, 5)
 		elseif player.drop then
-			love.graphics.print("Select item (i or spacebar to exit): ", 10, 5)
+			love.graphics.print("Drop (i or spacebar to exit): ", 10, 5)
+		elseif player.eat then
+			love.graphics.print("Eat (i or spacebar to exit): ", 10, 5)
 		else
 			love.graphics.print("Inventory (i or spacebar to exit): ", 10, 5)
 		end
 		love.graphics.setColor(200, 200, 200)
 		j = 5
-		for i = player.inv_minl, player.inv_maxl do
+		for i = player.inv_minl, #player.inv do
 			if i <= player.inv_cnt then
 				j = j + (5 + 24)
 				k = i
@@ -66,11 +68,8 @@ function drw_inv(num)
 					end
 				end
 				if not num then
-					print("--")
-					print("player.inv_minl: " .. player.inv_minl)
-					print("player.maxl:" .. player.inv_maxl)
-					print("player.max:" .. player._inv_max)
-					print("player.cnt:" .. player.inv_cnt)
+					s = player.inv[i][1]
+					s = s:gsub("^%l", string.upper)
 					if player.inv[i][2] == "w" then
 						love.graphics.print("> (W) " .. player.inv[i][1], 10, j);
 					else
@@ -187,8 +186,14 @@ function act_player(key)
 			player.inv_vis = true
 			player.inv_vist = true
 		end
+		if key == "e" then
+			add_stat("What do you want to eat?")
+			player.eat = true
+			player.inv_vis = true
+			player.inv_vist = true
+		end
 
-	elseif player.inv_vis and not player.drop and not player.wield_v then
+	elseif player.inv_vis and not player.drop and not player.wield_v and not player.eat then
 		local k = 5
 		if key == "h" then
 			if player.inv_minl > 1 then
@@ -305,8 +310,42 @@ function act_player(key)
 			player.inv_vist = false
 			player.wield_v = false
 		end 
-		-- while player.inv_maxl > player.inv_cnt do
-		-- 	player.inv_maxl = player.inv_maxl - 1
-		-- end
+	elseif player.inv_vis and player.eat then
+		local k = 5
+		if key == "h" then
+			if player.inv_minl > 1 then
+				player.inv_minl = player.inv_minl - k
+				player.inv_maxl = player.inv_maxl - k
+			end
+		elseif key == "l" then
+			if player.inv_maxl < player.inv_cnt then
+				player.inv_minl = player.inv_minl + k
+				player.inv_maxl = player.inv_maxl + k
+			end
+
+		elseif key == " " or key == "i" then
+			add_stat("Never Mind.")
+			player.inv_vis = false
+			player.inv_vist = false
+			player.eat = false
+		else
+			local k, j, s
+			for k = 1, player.inv_cnt do
+				if key == options[k] then
+					if player.inv[k][3] == "FOOD" then
+						s = player.inv[k][1]
+						s = s:gsub("^%l", string.upper)
+						add_stat("You eat the "..s.."!")
+						 player.hp = player.hp + math.random(player.eat_min*game.mapn, player.eat_max*game.mapn)
+					else
+						add_stat("You cannot eat that.")
+					end
+					break
+				end
+			end
+			player.inv_vis = false
+			player.inv_vist = false
+			player.eat = false
+		end 
 	end
 end

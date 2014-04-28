@@ -133,20 +133,7 @@ function variables()
 
 	player.inv = {  -- name, wield status, type      
 		{"Medium Strength Mining Laser", "w", "MLASMID", 10, 24},
-		{"Low Strength Mining Laser", "nw", "MLASLOW", 2, 5},
-		{"item 1", "na", "NONE"}, 
-		{"item 2", "na", "NONE"},
-		{"item 3", "na", "NONE"},
-		{"item 4", "na", "NONE"},
-		{"item 5", "na", "NONE"}, 
-		{"item 6", "na", "NONE"},
-		{"item 7", "na", "NONE"},
-		{"item 8", "na", "NONE"},
-		{"item 9", "na", "NONE"}, 
-		{"item 10", "na", "NONE"},
-		{"item 11", "na", "NONE"},
-		{"item 12", "na", "NONE"},
-		{"item 13", "na", "NONE"}
+		{"Low Strength Mining Laser", "nw", "MLASLOW", 2, 5}
 	}
 	-- See the inv HUD
 	player.inv_vis = false
@@ -159,6 +146,10 @@ function variables()
 	player.inv_minl = 1
 	-- Drop things?
 	player.drop = false
+	-- Eat things?
+	player.eat = true
+	player.eat_min = 3
+	player.eat_max = 4
 
 	-- Currently *:
 	player.wield = "MLASMID"
@@ -227,7 +218,7 @@ function chk_tile(x, y, dir, tile)
 end
 
 function drw_items()
-	local i, j, k
+	local i, k
 
 	for i = 1, #items do
 		k = items[i][6]
@@ -240,6 +231,9 @@ function drw_items()
 		elseif k == ":" or k == "&" or k == "~" or k == "%" then 
 			-- slug, troll, grue, alien 
 			love.graphics.setColor(200, 100, 25)
+		else
+			love.graphics.setColor(200, 100, 25)
+			k = "-"
 		end
 		love.graphics.print(k, items[i][4]-8, items[i][5]-16)
 	end
