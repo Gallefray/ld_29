@@ -109,15 +109,45 @@ function mlasmid_weap(dir) -- mining laser low power
 end
 
 function fire_weap(dir)
-	local i
-	if player.wield == "MLASLOW" then
-		mlaslow_weap(dir)
-		player.primed = false
-	elseif player.wield == "MLASMID" then
-		mlasmid_weap(dir)
-		player.primed = false
-	elseif player.wield == "" then
-		add_stat("Nothing to fire!")
-		player.primed = false
+	local i, k, ax, ay
+	local px = player.x/game.ts
+	local py = player.y/game.ts
+	k = true
+	for i = 1, #ai do
+		if ai[i].alive then
+			ax = ai[i].x/game.ts
+			ay = ai[i].y/game.ts
+			if dir == "left" and ax+1 == px and ay == py then
+				atk_player(i)
+				k = false
+				break
+			elseif dir == "down" and ax == px and ay-1 == py then
+				atk_player(i)
+				k = false
+				break
+			elseif dir == "up" and ax == px and ay+1 == py then
+				print("bloop")
+				atk_player(i)
+				k = false
+				break
+			elseif dir == "right" and ax-1 == px and ay == py then
+				atk_player(i)
+				k = false
+				break
+			end
+		end
+	end
+	player.primed = false
+	if k then
+		if player.wield == "MLASLOW" then
+			mlaslow_weap(dir)
+			player.primed = false
+		elseif player.wield == "MLASMID" then
+			mlasmid_weap(dir)
+			player.primed = false
+		elseif player.wield == "" then
+			add_stat("Nothing to fire!")
+			player.primed = false
+		end
 	end
 end

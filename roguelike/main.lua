@@ -19,10 +19,11 @@ function love.load()
 	require 'player'
 	require 'weap'
 	require 'gen'
+	require 'ai'
 
 	gen_map(game.mapn)
 	gen_player(game.mapn)
-	gen_AI(game.mapn)
+	gen_ai(game.mapn)
 end
 
 function love.update(dt)
@@ -186,7 +187,7 @@ function colorize(i)
 		love.graphics.setColor(168, 250, 7)
 	elseif i <= 95 then
 		love.graphics.setColor(115, 250, 5)
-	elseif i == 100 then
+	elseif i >= 100 then
 		love.graphics.setColor(64, 255, 86)
 	end
 end
@@ -229,200 +230,17 @@ function drw_items()
 	local i, j, k
 
 	for i = 1, #items do
-		k = "i"
-		for j = 1, #weaps do
-			if items[i][3] == weaps[j] then
-				k = "w"
-			end
-		end
+		k = items[i][6]
 		if k == "i" then
 			love.graphics.setColor(25, 200, 25)
 		elseif k == "w" then
 			love.graphics.setColor(200, 25, 25)
+		elseif k == "c" then
+			love.graphics.setColor(200, 25, 25)
+		elseif k == ":" or k == "&" or k == "~" or k == "%" then 
+			-- slug, troll, grue, alien 
+			love.graphics.setColor(200, 100, 25)
 		end
 		love.graphics.print(k, items[i][4]-8, items[i][5]-16)
-	end
-end
-
-function gen_AI(mapn)
-	-- data is packed into the table like:
-	-- {mname, x, y, attack, hp, state}
-	local mname = math.random(1, #_ai_n)
-	local attack_min = math.random((ai_dat.mindmg*mapn)*_ai_t[mname],
-							   (ai_dat.maxdmg*mapn)*_ai_t[mname])
-	local attack_max = math.random(attack_min,
-							   (ai_dat.maxdmg*mapn)*_ai_t[mname])
-	local hp = math.random(ai_dat.minhp*mapn*_ai_t[mname],
-						   ai_dat.maxhp*mapn*_ai_t[mname])
-	local state = _ai_stat["inert"]
-
-	local loc = {}
-	for i = 1, game.mapw do
-		for j = 1, game.maph do
-			if game.map[mapn][j][i] == floor then
-				table.insert(loc, {x=i, y=j})
-			end
-		end
-	end
-
-	local k = math.random(1, #loc)
-	table.insert(ai, {nam=mname, x=loc[k].x*game.ts, y=loc[k].y*game.ts, atkmin=attack_min, atkmax=attack_max, hp=hp, state=state})
-end
-
-function drw_ai()
-	local i
-	for i = 1, #ai do
-		love.graphics.setColor(255, 255, 255, 255)
-		if _ai_hn[ai[i].nam] == "slug" then
-			colorize(ai[i].hp)
-			love.graphics.print("S", ai[i].x-8, ai[i].y-16)
-		elseif _ai_hn[ai[i].nam] == "troll" then
-			colorize(ai[i].hp)
-			love.graphics.print("T", ai[i].x-8, ai[i].y-16)
-		elseif _ai_hn[ai[i].nam] == "grue" then
-			colorize(ai[i].hp)
-			love.graphics.print("G", ai[i].x-8, ai[i].y-16)
-		elseif _ai_hn[ai[i].nam] == "alien" then
-			colorize(ai[i].hp)
-			love.graphics.print("A", ai[i].x-8, ai[i].y-16)
-		end
-	end
-	--print(player.x .. "  " .. player.y)
-end
-
-function act_ai()
-	local i 
-	local DIST = 15*6
-
-	for i = 1, #ai do
-		-- print("i: " .. i)
-		-- print("HP: " .. (ai[i].hp/(ai_dat.maxhp*game.mapn*_ai_t[ai[i].nam]))*100)
-
-		if ai[i].state == _ai_stat["inert"] then
-			-- print("inert")
-			if player.x < ai[i].x+DIST and player.x > ai[i].x-DIST and
-			   player.y < ai[i].y+DIST and player.y > ai[i].y-DIST then
-
-			    if (ai[i].hp/(ai_dat.maxhp*game.mapn*_ai_t[ai[i].nam]))*100 < 25 then
-			    	ai[i].state = _ai_stat["flee"]
-			    else
-			    	ai[i].state = _ai_stat["fight"]
-			    end
-			end
-		elseif ai[i].state == _ai_stat["flee"] then
-			if player.x < ai[i].x+DIST and player.x > ai[i].x-DIST and
-			   player.y < ai[i].y+DIST and player.y > ai[i].y-DIST then
-				if player.x > ai[i].x then
-					mov_ai(i, "left")
-				elseif player.y < ai[i].y then
-					mov_ai(i, "down")
-				elseif player.y > ai[i].y then
-					mov_ai(i, "up")
-				elseif player.x < ai[i].x then
-					mov_ai(i, "right")
-				end
-			end
-
-		elseif ai[i].state == _ai_stat["fight"] then
-			local DIST = 15*8
-			local sDIST = 15*6
-			if player.x < ai[i].x+DIST and player.x > ai[i].x-DIST and
-			   player.y < ai[i].y+DIST and player.y > ai[i].y-DIST then
-				if ai[i].nam == _ai_n.alien then
-					-- Get player - alien distance and randomize between 
-					-- dist/3 and dist for firing gun
-					if player > 15*6 then
-
-					end
-				else
-					local px = player.x/game.ts
-					local py = player.y/game.ts
-					local ax = ai[i].x/game.ts
-					local ay = ai[i].y/game.ts
-
-					-- left, down, up right
-					if ax-1 == px and ay == py then
-						atk_ai(i)
-					elseif ax == px and ay+1 == py then
-						atk_ai(i)
-					elseif ax == px and ay-1 == py then
-						atk_ai(i)
-					elseif ax+1 == px and ay == py then
-						atk_ai(i)
-					else
-						if player.x > ai[i].x then
-							mov_ai(i, "right")
-						elseif player.y < ai[i].y then
-							mov_ai(i, "up")
-						end
-						if player.y > ai[i].y then
-							mov_ai(i, "down")
-						elseif player.x < ai[i].x then
-							mov_ai(i, "left")
-						end
-					end
-				end
-			end
-		end
-	end
-end
-
-function mov_ai(i, dir)
-	local nx = ai[i].x
-	local ny = ai[i].y
-	if dir == "left" then
-		if not chk_tile(nx, ny, "left", wall) and 
-			   chk_tile(nx, ny, "left", floor) then
-			ai[i].x = ai[i].x - game.ts
-		end
-	elseif dir == "right" then
-		if not chk_tile(nx, ny, "right", wall) and
-			   chk_tile(nx, ny, "right", floor) then
-			ai[i].x = ai[i].x + game.ts
-		end
-	end
-	if dir == "down" then
-		if not chk_tile(nx, ny, "down", wall) and
-			   chk_tile(nx, ny, "down", floor) then
-			ai[i].y = ai[i].y + game.ts
-		end
-	elseif dir == "up" then
-		if not chk_tile(nx, ny, "up", wall) and
-			   chk_tile(nx, ny, "up", floor) then
-			ai[i].y = ai[i].y - game.ts
-		end
-	end
-end
-
-function atk_ai(i) -- ai -> player
-	name = _ai_hn[ai[i].nam]
-	j = math.random(0, 2) -- 1 in 3 chance of getting hit (on... ;_;)
-	if j == 0 then
-		local loss = math.random(ai[i].atkmin, ai[i].atkmax)
-		add_stat("The " .. name .. " attacked you!")
-		add_stat("You lose " .. loss .. " HP!")
-		player.hp = player.hp - loss
-	else
-		add_stat("The " .. name .. " missed!")
-	end
-end
-
-function atk_player(i)
-	name = _ai_hn[ai[i].nam]
-	j = math.random(0, 2) -- 1 in 3 chance of hitting (it off... ;_;)
-	local min, max, k
-	if j == 0 then
-		for k = 1, #player.inv do
-			if player.inv[2] == "w" then
-				min = player.inv[4]
-				max = player.inv[5]
-			end
-		end
-		local loss = math.random(min, max)
-		add_stat("You attacked the " .. name .. "!")
-		add_stat("The " .. name .. " loses " .. loss .. " HP!")
-		player.hp = player.hp - loss
-	else
-		add_stat("You missed!")
 	end
 end

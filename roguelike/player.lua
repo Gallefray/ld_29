@@ -174,7 +174,7 @@ function act_player(key)
 						else
 							table.insert(player.inv, {items[i][1], items[i][2], items[i][3]})
 							player.inv_cnt = player.inv_cnt + 1 
-							add_stat("Picked up " .. items[i][1])
+							add_stat("Picked up " .. items[i][1] .. ".")
 							table.remove(items, i)
 						end
 					end 
@@ -224,19 +224,21 @@ function act_player(key)
 			player.inv_vist = false
 			player.drop = false
 		else
-			local k, l, z
+			local k, l, z, c
 			for k = 1, player.inv_cnt do
 				if key == options[k] then
 					z = "na"
+					c = "i"
 					for l = 1, #weaps do
 						if weaps[l] == player.inv[k][3] then
+							c = "w"
 							z = "nw"
 							if player.wield == player.inv[k][3] then
 								player.wield = ""
 							end
 						end
 					end
-					table.insert(items, {player.inv[k][1], z, player.inv[k][3], player.x, player.y})		
+					table.insert(items, {player.inv[k][1], z, player.inv[k][3], player.x, player.y, c})		
 					add_stat("Dropped " .. player.inv[k][1])
 					table.remove(player.inv, k)
 					player.inv_cnt = player.inv_cnt - 1
