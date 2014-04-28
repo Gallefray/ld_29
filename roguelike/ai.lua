@@ -198,15 +198,15 @@ function atk_player(i)
 end
 
 function die_ai(i)
-	local name = ai[i].nam
+	local r = math.random(1, 4)
 	local s = ""
-	if name == _ai_n.slug then
+	if r == 1 then
 		s = ":"
-	elseif name == _ai_n.troll then
+	elseif r == 2 then
 		s = "&"
-	elseif name == _ai_n.grue then
-		s = "~"
-	elseif name == _ai_n.alien then
+	elseif r == 3 then
+		s = "-"
+	elseif r == 4 then
 		s = "%"
 	end
 	table.insert(items, {_ai_hn[ai[i].nam] .. " corpse", "c", "FOOD", ai[i].x, ai[i].y, s})

@@ -67,19 +67,19 @@ function drw_inv(num)
 						k = options[l]
 					end
 				end
+				s = player.inv[i][1]
+				s = s:gsub("^%l", string.upper)
 				if not num then
-					s = player.inv[i][1]
-					s = s:gsub("^%l", string.upper)
 					if player.inv[i][2] == "w" then
-						love.graphics.print("> (W) " .. player.inv[i][1], 10, j);
+						love.graphics.print("> (W) " .. s, 10, j);
 					else
-						love.graphics.print("> " .. player.inv[i][1], 10, j);
+						love.graphics.print("> " .. s, 10, j);
 					end
 				elseif num then
 					if player.inv[i][2] == "w" then
-						love.graphics.print(k .. ") (W) " .. player.inv[i][1], 10, j);
+						love.graphics.print(k .. ") (W) " .. s, 10, j);
 					else
-						love.graphics.print(k .. ") " .. player.inv[i][1], 10, j);
+						love.graphics.print(k .. ") " .. s, 10, j);
 					end
 				end
 			elseif i > player.inv_cnt then
@@ -168,13 +168,18 @@ function act_player(key)
 			for i = 1, #items do
 				if items[i] ~= nil then
 					if player.x == items[i][4] and player.y == items[i][5] then
-						if player.inv_cnt == player._inv_max then
-							add_stat("Your inventory is full!" .. items[i][1])	
-						else
-							table.insert(player.inv, {items[i][1], items[i][2], items[i][3]})
-							player.inv_cnt = player.inv_cnt + 1 
-							add_stat("Picked up " .. items[i][1] .. ".")
+						if items[i][3] == "MONEY" then
+							player.score = player.score + items[i][6]
 							table.remove(items, i)
+						else
+							if player.inv_cnt == player._inv_max then
+								add_stat("Your inventory is full!" .. items[i][1])	
+							else
+								table.insert(player.inv, {items[i][1], items[i][2], items[i][3]})
+								player.inv_cnt = player.inv_cnt + 1 
+								add_stat("Picked up " .. items[i][1] .. ".")
+								table.remove(items, i)
+							end
 						end
 					end 
 				end

@@ -24,6 +24,7 @@ function love.load()
 	gen_map(game.mapn)
 	gen_player(game.mapn)
 	gen_ai(game.mapn)
+	gen_money(game.mapn)
 end
 
 function love.update(dt)
@@ -128,8 +129,8 @@ function variables()
 	player = {}
 	player.hp = 95
 	player._mhp = 100
-	-- player.arm = 30
-	player.pwr = 90
+	player.score = 0
+	player.pwr = 1
 
 	player.inv = {  -- name, wield status, type      
 		{"Medium Strength Mining Laser", "w", "MLASMID", 10, 24},
@@ -148,8 +149,16 @@ function variables()
 	player.drop = false
 	-- Eat things?
 	player.eat = true
-	player.eat_min = 3
-	player.eat_max = 4
+	player.eat_min = 10
+	player.eat_max = 40
+
+	-- amount of money on the floor (times player.mapn)
+	player.score_min = 10
+	player.score_max = 50
+
+	-- amount of power (multiplier)
+	player.power_min = 1
+	player.power_min = 4
 
 	-- Currently *:
 	player.wield = "MLASMID"
@@ -178,7 +187,7 @@ function colorize(i)
 		love.graphics.setColor(168, 250, 7)
 	elseif i <= 95 then
 		love.graphics.setColor(115, 250, 5)
-	elseif i >= 100 then
+	elseif i <= 100 or i > 100 then
 		love.graphics.setColor(64, 255, 86)
 	end
 end
@@ -199,6 +208,9 @@ function drw_hud()
 	love.graphics.print(player.pwr, 64, (game.maph+2.7)*game.ts)
 	love.graphics.setColor(150, 150, 150, 255)
 	love.graphics.print("LVL: " .. game.mapn, 15, (game.maph+4.2)*game.ts)
+	love.graphics.setColor(150, 150, 150, 255)
+	love.graphics.print("Score: ", 110, (game.maph+1.2)*game.ts)
+	love.graphics.print(player.score, 185, (game.maph+1.2)*game.ts)
 end
 
 -- I could clean up a lot of code by using this function, something for day 3!
@@ -221,20 +233,62 @@ function drw_items()
 	local i, k
 
 	for i = 1, #items do
-		k = items[i][6]
-		if k == "i" then
-			love.graphics.setColor(25, 200, 25)
-		elseif k == "w" then
-			love.graphics.setColor(200, 25, 25)
-		elseif k == "c" then
-			love.graphics.setColor(200, 25, 25)
-		elseif k == ":" or k == "&" or k == "~" or k == "%" then 
-			-- slug, troll, grue, alien 
+		if items[i][3] == "MONEY" then
+			k = "$"
+			love.graphics.setColor(245, 204, 83)
+		elseif items[i][3] == "POWER" then
+			k = "~"
+			love.graphics.setColor(245, 204, 83)
+		elseif items[i][3] == "FOOD" then
+			k = items[i][6]
 			love.graphics.setColor(200, 100, 25)
 		else
-			love.graphics.setColor(200, 100, 25)
-			k = "-"
+			if k == "i" then
+				love.graphics.setColor(25, 200, 25)
+			elseif k == "w" then
+				love.graphics.setColor(200, 25, 25)
+			elseif k == "c" then
+				love.graphics.setColor(200, 25, 25)
+			end
 		end
 		love.graphics.print(k, items[i][4]-8, items[i][5]-16)
 	end
+end
+
+function gen_money(mapn)
+	local i, j, k
+	local x, y, pnt
+	local loc = {}
+	for i = 1, game.mapw do
+		for j = 1, game.maph do
+			if game.map[mapn][j][i] == floor then
+				table.insert(loc, {x=i, y=j})
+			end
+		end
+	end
+
+	k = math.random(1, #loc)
+	x = loc[k].x*game.ts
+	y = loc[k].y*game.ts 
+	pnt = math.random(player.score_min*game.mapn, player.score_max*game.mapn)
+	table.insert(items, {nil, nil, "MONEY", x, y, pnt})
+end
+
+function gen_prpk(mapn)
+	local i, j, k
+	local x, y, pwr
+	local loc = {}
+	for i = 1, game.mapw do
+		for j = 1, game.maph do
+			if game.map[mapn][j][i] == floor then
+				table.insert(loc, {x=i, y=j})
+			end
+		end
+	end
+
+	k = math.random(1, #loc)
+	x = loc[k].x*game.ts
+	y = loc[k].y*game.ts 
+	pwr = math.random(player.power_min*game.mapn, player.power_max*game.mapn)
+	table.insert(items, {nil, nil, "POWER", x, y, pwr})
 end
