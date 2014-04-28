@@ -99,10 +99,17 @@ function variables()
 	}
 	_ai_n = {
 		-- nam
-		troll = 1,
-		slug = 2,
-		grue = 3,	-- You are likely to be eaten by a grue... etc
-		alien = 4
+		1,
+		2,
+		3,	-- You are likely to be eaten by a grue... etc
+		4
+	}
+	_ai_hn = { -- human readable names
+		-- nam
+		"troll",
+		"slug",
+		"grue",	-- You are likely to be eaten by a grue... etc
+		"alien"
 	}
 	_ai_t = {
 		-- multipliers:
@@ -124,8 +131,8 @@ function variables()
 	player.pwr = 90
 
 	player.inv = {  -- name, wield status, type      
-		{"Medium Strength Mining Laser", "w", "MLASMID"},
-		{"Low Strength Mining Laser", "nw", "MLASLOW"},
+		{"Medium Strength Mining Laser", "w", "MLASMID", 10, 24},
+		{"Low Strength Mining Laser", "nw", "MLASLOW", 2, 5},
 		{"item 1", "na", "NONE"}, 
 		{"item 2", "na", "NONE"},
 		{"item 3", "na", "NONE"},
@@ -241,7 +248,9 @@ function gen_AI(mapn)
 	-- data is packed into the table like:
 	-- {mname, x, y, attack, hp, state}
 	local mname = math.random(1, #_ai_n)
-	local attack = math.random((ai_dat.mindmg*mapn)*_ai_t[mname],
+	local attack_min = math.random((ai_dat.mindmg*mapn)*_ai_t[mname],
+							   (ai_dat.maxdmg*mapn)*_ai_t[mname])
+	local attack_max = math.random(attack_min,
 							   (ai_dat.maxdmg*mapn)*_ai_t[mname])
 	local hp = math.random(ai_dat.minhp*mapn*_ai_t[mname],
 						   ai_dat.maxhp*mapn*_ai_t[mname])
@@ -257,23 +266,23 @@ function gen_AI(mapn)
 	end
 
 	local k = math.random(1, #loc)
-	table.insert(ai, {nam=mname, x=loc[k].x*game.ts, y=loc[k].y*game.ts, atk=attack, hp=hp, state=state})
+	table.insert(ai, {nam=mname, x=loc[k].x*game.ts, y=loc[k].y*game.ts, atkmin=attack_min, atkmax=attack_max, hp=hp, state=state})
 end
 
 function drw_ai()
 	local i
 	for i = 1, #ai do
 		love.graphics.setColor(255, 255, 255, 255)
-		if ai[i].nam == _ai_n.troll then
+		if _ai_hn[ai[i].nam] == "slug" then
 			colorize(ai[i].hp)
 			love.graphics.print("S", ai[i].x-8, ai[i].y-16)
-		elseif ai[i].nam == _ai_n.slug then
+		elseif _ai_hn[ai[i].nam] == "troll" then
 			colorize(ai[i].hp)
 			love.graphics.print("T", ai[i].x-8, ai[i].y-16)
-		elseif ai[i].nam == _ai_n.grue then
+		elseif _ai_hn[ai[i].nam] == "grue" then
 			colorize(ai[i].hp)
 			love.graphics.print("G", ai[i].x-8, ai[i].y-16)
-		elseif ai[i].nam == _ai_n.alien then
+		elseif _ai_hn[ai[i].nam] == "alien" then
 			colorize(ai[i].hp)
 			love.graphics.print("A", ai[i].x-8, ai[i].y-16)
 		end
@@ -316,11 +325,15 @@ function act_ai()
 
 		elseif ai[i].state == _ai_stat["fight"] then
 			local DIST = 15*8
+			local sDIST = 15*6
 			if player.x < ai[i].x+DIST and player.x > ai[i].x-DIST and
 			   player.y < ai[i].y+DIST and player.y > ai[i].y-DIST then
 				if ai[i].nam == _ai_n.alien then
-					-- get player - alien distance and randomize between 
+					-- Get player - alien distance and randomize between 
 					-- dist/3 and dist for firing gun
+					if player > 15*6 then
+
+					end
 				else
 					local px = player.x/game.ts
 					local py = player.y/game.ts
@@ -329,13 +342,13 @@ function act_ai()
 
 					-- left, down, up right
 					if ax-1 == px and ay == py then
-						add_stat("The " .. ai[i].nam .. " attacks you! (left)")
+						atk_ai(i)
 					elseif ax == px and ay+1 == py then
-						add_stat("The " .. ai[i].nam .. " attacks you! (down)")
+						atk_ai(i)
 					elseif ax == px and ay-1 == py then
-						add_stat("The " .. ai[i].nam .. " attacks you! (up)")
+						atk_ai(i)
 					elseif ax+1 == px and ay == py then
-						add_stat("The " .. ai[i].nam .. " attacks you! (right)")
+						atk_ai(i)
 					else
 						if player.x > ai[i].x then
 							mov_ai(i, "right")
@@ -378,5 +391,38 @@ function mov_ai(i, dir)
 			   chk_tile(nx, ny, "up", floor) then
 			ai[i].y = ai[i].y - game.ts
 		end
+	end
+end
+
+function atk_ai(i) -- ai -> player
+	name = _ai_hn[ai[i].nam]
+	j = math.random(0, 2) -- 1 in 3 chance of getting hit (on... ;_;)
+	if j == 0 then
+		local loss = math.random(ai[i].atkmin, ai[i].atkmax)
+		add_stat("The " .. name .. " attacked you!")
+		add_stat("You lose " .. loss .. " HP!")
+		player.hp = player.hp - loss
+	else
+		add_stat("The " .. name .. " missed!")
+	end
+end
+
+function atk_player(i)
+	name = _ai_hn[ai[i].nam]
+	j = math.random(0, 2) -- 1 in 3 chance of hitting (it off... ;_;)
+	local min, max, k
+	if j == 0 then
+		for k = 1, #player.inv do
+			if player.inv[2] == "w" then
+				min = player.inv[4]
+				max = player.inv[5]
+			end
+		end
+		local loss = math.random(min, max)
+		add_stat("You attacked the " .. name .. "!")
+		add_stat("The " .. name .. " loses " .. loss .. " HP!")
+		player.hp = player.hp - loss
+	else
+		add_stat("You missed!")
 	end
 end

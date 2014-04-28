@@ -105,6 +105,7 @@ function mov_player(key)
 	if not player.primed and not player.inv_vis then
 		local px = player.x
 		local py = player.y
+		local i
 		if key == "h" then
 			if not chk_tile(px, py, "left", wall) and 
 				   chk_tile(px, py, "left", floor) then
