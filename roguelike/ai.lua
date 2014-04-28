@@ -163,8 +163,8 @@ end
 
 function atk_ai(i) -- ai -> player
 	name = _ai_hn[ai[i].nam]
-	j = math.random(0, 3) -- 1 in 3 chance of getting hit (on... ;_;)
-	if j < 1 then
+	j = math.random(0.0, 1.2) -- chance of getting hit (on... ;_;)
+	if j < .5 then
 		local loss = math.random(ai[i].atkmin, ai[i].atkmax)
 		add_stat("The " .. name .. " attacked you!")
 		add_stat("You lose " .. loss .. " HP!")
@@ -176,7 +176,7 @@ end
 
 function atk_player(i)
 	local name = _ai_hn[ai[i].nam]
-	local j = math.random(0.0, 1) -- 1 in 3 chance of hitting (it off... ;_;)
+	local j = math.random(0.0, 1) -- chance of hitting (it off... ;_;)
 	local min, max, k
 	if j < .5 then
 		for k = 1, #player.inv do
@@ -188,7 +188,7 @@ function atk_player(i)
 				print("Bleep")
 			end
 		end
-		local loss = math.random(min, max)
+		local loss = math.random(min, max)*player.pwr
 		add_stat("You attacked the " .. name .. "!")
 		add_stat("The " .. name .. " loses " .. loss .. " HP!")
 		ai[i].hp = ai[i].hp - loss

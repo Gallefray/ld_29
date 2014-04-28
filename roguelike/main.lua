@@ -21,10 +21,12 @@ function love.load()
 	require 'gen'
 	require 'ai'
 
+	gen_map(1)
 	gen_map(game.mapn)
 	gen_player(game.mapn)
 	gen_ai(game.mapn)
 	gen_money(game.mapn)
+	gen_prpk(game.mapn)
 end
 
 function love.update(dt)
@@ -77,7 +79,7 @@ function variables()
 	game = {}
 	game.mapw = 53
 	game.maph = 33
-	game.mapn = 1
+	game.mapn = 2
 	game.map = maps
 	game.ts = 15 -- ?
 
@@ -127,8 +129,8 @@ function variables()
 	}
 
 	player = {}
-	player.hp = 95
-	player._mhp = 100
+	player.hp = 200
+	player._mhp = 200
 	player.score = 0
 	player.pwr = 1
 
@@ -149,7 +151,7 @@ function variables()
 	player.drop = false
 	-- Eat things?
 	player.eat = true
-	player.eat_min = 10
+	player.eat_min = 5
 	player.eat_max = 40
 
 	-- amount of money on the floor (times player.mapn)
@@ -158,7 +160,7 @@ function variables()
 
 	-- amount of power (multiplier)
 	player.power_min = 1
-	player.power_min = 4
+	player.power_max = 4
 
 	-- Currently *:
 	player.wield = "MLASMID"
@@ -290,5 +292,5 @@ function gen_prpk(mapn)
 	x = loc[k].x*game.ts
 	y = loc[k].y*game.ts 
 	pwr = math.random(player.power_min*game.mapn, player.power_max*game.mapn)
-	table.insert(items, {nil, nil, "POWER", x, y, pwr})
+	table.insert(items, {"Powerpack x2000 (tm)", nil, "POWER", x, y, pwr})
 end

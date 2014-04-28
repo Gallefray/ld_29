@@ -170,6 +170,11 @@ function act_player(key)
 					if player.x == items[i][4] and player.y == items[i][5] then
 						if items[i][3] == "MONEY" then
 							player.score = player.score + items[i][6]
+							add_stat("Picked up the gold.")
+							table.remove(items, i)
+						elseif items[i][3] == "POWER" then
+							player.pwr = player.pwr + items[i][6]
+							add_stat("Picked up the " .. items[i][1] .. ".")
 							table.remove(items, i)
 						else
 							if player.inv_cnt == player._inv_max then
