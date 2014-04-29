@@ -180,12 +180,10 @@ function atk_player(i)
 	local min, max, k
 	if j < .5 then
 		for k = 1, #player.inv do
-			print("Bleep")
 			if player.inv[k][2] == "w" then
 				min = player.inv[k][4]
 				max = player.inv[k][5]
 				break
-				print("Bleep")
 			end
 		end
 		local loss = math.random(min, max)*player.pwr

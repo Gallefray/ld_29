@@ -29,3 +29,9 @@ function drw_map()
 		end
 	end
 end
+
+function swch_lvl()
+	ai = {}
+	items = {}
+	game.mapn = game.mapn + 1
+end

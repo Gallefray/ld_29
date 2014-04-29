@@ -114,10 +114,10 @@ function variables()
 	}
 	_ai_t = {
 		-- multipliers:
-		1.3,
 		1,
-		2,
-		2.2
+		1.1,
+		1.2,
+		1.6
 	}
 	_ai_stat = {
 		["flee"] = 1,
@@ -157,7 +157,7 @@ function variables()
 
 	-- amount of power (multiplier)
 	player.power_min = 1
-	player.power_max = 4
+	player.power_max = 3
 
 	-- Currently *:
 	player.wield = "MLASMID"
@@ -170,7 +170,6 @@ function variables()
 		"MLASMID"
 	}
 
-	updoor = {x=0, y=0}
 	dwndoor = {x=0, y=0}
 end
 
@@ -259,8 +258,5 @@ end
 
 function drw_doors()
 	love.graphics.setColor(170, 170, 170)
-	if game.mapn > 1 then
-		love.graphics.print("<", updoor.x-8, updoor.y-16)
-	end
 	love.graphics.print(">", dwndoor.x-8, dwndoor.y-16)
 end

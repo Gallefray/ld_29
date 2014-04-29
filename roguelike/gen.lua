@@ -73,24 +73,27 @@ function gen_room(mapn)
 
 	-- check if the room is close to another one and space it out if it is
 	-- y top, y bottom
-	h = h - 2
-
+	-- h = h - 2
 	j = y
 	for i = x, x+w do
 		if game.map[mapn][j-1][i] == wall or game.map[mapn][j-1][i] == floor then
 			y = y + 1
 			if y+h > game.maph then
-				h = h - 1
+				h = h - 2
 			end
 		end
 	end
 
 	j = y+h
 	for i = x, x+w do
-		-- What is it with this line. Why does it occasionally throw up errors.
-		-- Fixed due to the `h = h -2`, but I shouldn't need that line D:
-		if game.map[mapn][j+1][i] == wall or game.map[mapn][j+1][i] == floor then
-			h = h - 1
+		-- j sometimes goes over the game.maph...
+		if j+1 < game.maph then
+			if game.map[mapn][j+1][i] == floor then
+				h = h - 1
+			end
+			if game.map[mapn][j+1][i] == wall then 
+				h = h - 1
+			end
 		end
 	end
 	-- x top, x bottom
@@ -248,19 +251,19 @@ function get_mast(mapn)
 	local m_max = 3*mapn
 	local m_min = 1*mapn
 	local m = math.random(m_min, m_max)
-	local pp = math.random(0, 1)
-	gen_map(game.mapn)
-	gen_player(game.mapn)
+	local pp = math.random(0, 2)
+	gen_map(mapn)
+	gen_player(mapn)
 	while e > 0 do
-		gen_ai(game.mapn)
+		gen_ai(mapn)
 		e = e - 1
 	end
 	while m > 0 do
-		gen_money(game.mapn)
+		gen_money(mapn)
 		m = m - 1
 	end
 	if pp == 1 then
-		gen_prpk(game.mapn)
+		gen_prpk(mapn)
 	end
-	gen_strdwn(game.mapn)
+	gen_strdwn(mapn)
 end

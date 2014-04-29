@@ -32,10 +32,6 @@ function gen_player(mapn)
 	k = math.random(1, #loc)
 	player.x = loc[k].x*game.ts
 	player.y = loc[k].y*game.ts
-	if mapn > 1 then
-		updoor.x = loc[k].x
-		updoor.y = loc[k].y
-	end
 end
 
 function drw_player()
@@ -206,12 +202,13 @@ function act_player(key)
 			player.inv_vis = true
 			player.inv_vist = true
 		end
-		if key == "." and love.keyboard.isDown("lshift") then
-			print("player.x: " .. player.x .. " player.y: " .. player.y)
-			print("dwndoor.x: " .. dwndoor.x .. " dwndoor.y: " .. dwndoor.y)
+		if key == "." and love.keyboard.isDown("rshift", "lshift") then
 			if player.x == dwndoor.x and player.y == dwndoor.y then
 				local mn = game.mapn
-				add_stat("You decend into the depths of the dungeon")
+				add_stat("You descend into the depths of the dungeon.")
+				add_stat("The stairs crumble into dust behind you.")
+				swch_lvl()
+				get_mast(game.mapn)
 			end
 		end
 
@@ -359,6 +356,7 @@ function act_player(key)
 							s = player.inv[k][1]
 							s = s:gsub("^%l", string.upper)
 							add_stat("You eat the "..s.."!")
+							add_stat("Children across the universe go \"Eww!\"")
 							player.hp = player.hp + math.random(player.eat_min*game.mapn, player.eat_max*game.mapn)
 							table.remove(player.inv, k)
 							player.inv_cnt = player.inv_cnt - 1
